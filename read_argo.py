@@ -21,7 +21,7 @@ def list_files(ddir, ext):
 
 def get_prof(data_file,lat_range,lon_range):
     data_file = xr.open_dataset(data_file)
-    mask = (data_file.LATITUDE>lat_range[0]) & (data_file.LATITUDE<lat_range[1]) & (data_file.LONGITUDE > lons[0]) & (data_file.LONGITUDE < lons[1])
+    mask = (data_file.LATITUDE>lat_range[0]) & (data_file.LATITUDE<lat_range[1]) & (data_file.LONGITUDE > lon_range[0]) & (data_file.LONGITUDE < lon_range[1])
     platf = data_file.PLATFORM_NUMBER.load()
     plat_num = platf[mask].astype(str)
     data_file.close()
