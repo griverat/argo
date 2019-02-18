@@ -9,16 +9,14 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 -----
 """
 
-from dask.distributed import Client, LocalCluster
-from dask.diagnostics import progress
+from dask.distributed import Client, LocalCluster, progress
 from dask import delayed
 import xarray as xr
-import os
-import gsw
 import numpy as np
 import pandas as pd
 import dask.array as da
-
+import os
+import gsw
 
 def filter_data(data, lat, lon, time):
     filt = data[(data['date']>time[0])&(data['date']<time[1])]
