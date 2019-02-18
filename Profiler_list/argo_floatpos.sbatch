@@ -5,7 +5,7 @@
 #SBATCH --time 00:30:00
 #SBATCH --mem-per-cpu 4000
 #SBATCH --job-name argo_floatpos
-#SBATCH --output argo_floatpos-%J.txt
+#SBATCH --output logs/argo_floatpos-%J.txt
 
 source /home/grivera/miniconda3/etc/profile.d/conda.sh
 
