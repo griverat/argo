@@ -29,7 +29,7 @@ def filter_data(data, lat, lon, time):
 
 @delayed
 def get_temp_anom(fname,prof,clim,grid):
-    data = xr.open_dataset(fname)
+    data = xr.open_dataset(fname).load()
     temp = data.TEMP[prof].data
     depth = gsw.conversions.z_from_p(data.PRES[prof],data.LATITUDE[prof])
     mask = ~np.isnan(temp)
@@ -96,13 +96,16 @@ def main(lat,lon,time):
     print(newdf.head())
     godas_clim = xr.open_dataset('/data/users/grivera/GODAS/godas_dayclim.nc').pottmp
     godas_clim = godas_clim.sel(lat=slice(lat[0],lat[1]),lon=slice(lon[0],lon[1])).mean(dim=['lat','lon'])
-    new_data = dastack([get_temp_anom(r.fname,r.nprof,godas_clim, grid) for r in newdf.itertuples()])
+    print(godas_clim)
+    new_data = dastack([get_temp_anom(r.fname,r.nprof,godas_clim, grid) for r in newdf.iloc[:3].itertuples()])
     new_data = new_data.persist()
     progress(new_data)
-    mlon = np.mean(lon)
-    mlat = np.mean(lat)
-    save_nc(newdf, new_data[:,0,:],'argo_tanom','tanom',mlon,mlat, grid)
-    save_nc(newdf, new_data[:,1,:],'argo_temp','temp',mlon,mlat, grid)
+    print(new_data.compute().compute().shape)
+    print(new_data[:,1,:].compute().compute())
+    # mlon = np.mean(lon)
+    # mlat = np.mean(lat)
+    # save_nc(newdf, new_data[:,0,:],'argo_tanom','tanom',mlon,mlat, grid)
+    # save_nc(newdf, new_data[:,1,:],'argo_temp','temp',mlon,mlat, grid)
 
 
 if __name__ == '__main__':
