@@ -39,7 +39,7 @@ def get_temp_anom(fname,prof,clim,grid):
     try:
         func = PchipInterpolator(-depth[mask],temp[mask])
     except:
-        print('Error on file {}'.format(fname))
+        # print('Error on file {}'.format(fname))
         return np.full_like(np.array([grid,grid]), np.nan, dtype=np.double)
     new_grid = np.where(grid>-depth[mask][-1],np.nan,grid)
     new_grid[np.where(grid<-depth[mask][0])] = np.nan
@@ -50,7 +50,7 @@ def get_temp_anom(fname,prof,clim,grid):
     lon = data.LONGITUDE[prof].data
     day = clim.sel(time=date)
     day = day.interp(depth=grid)
-    return np.array([new_data - day.data, new_data])
+    return np.array([new_data - day.data + 273, new_data])
 
 
 @delayed
@@ -60,7 +60,7 @@ def dastack(data):
 
 def save_nc(argodb, argo_data, filename, varname, lon, lat, grid,
             outdir='/data/users/grivera/ARGO-patch'):
-    argo_data = xr.Dataset({varname:(['lat','lon','time','level'],np.array([[argodata.compute().compute()]]))},
+    argo_data = xr.Dataset({varname:(['lat','lon','time','level'],np.array([[argo_data.compute().compute()]]))},
                             coords={'lon':[lon],
                                     'lat':[lat],
                                     'time':argodb.date.values,
@@ -91,16 +91,18 @@ def main(lat,lon,time):
     grid = np.arange(0,2001,2.)
     newdf = filter_data(argodb,lat,lon,time)[0]
     newdf['fname'] = newdf['date'].apply(get_fn,args=(ARGO_DIR,'{:%Y%m%d}_prof.nc'))
+    newdf = newdf.sort_values('date')
     print(newdf.head())
     godas_clim = xr.open_dataset('/data/users/grivera/GODAS/godas_dayclim.nc')
     godas_clim = godas_clim.sel(lat=slice(lat[0],lat[1]),lon=slice(lon[0],lon[1])).mean(dim=['lat','lon'])
-    new_data = dastack([get_temp_anom(r.fname,r.nprof,godas_clim, grid) for r in newdf.iloc[:3].itertuples()])
+    new_data = dastack([get_temp_anom(r.fname,r.nprof,godas_clim, grid) for r in newdf.itertuples()])
     new_data = new_data.persist()
     progress(new_data)
+    print(new_data)
     mlon = np.mean(lon)
     mlat = np.mean(lat)
-    # save_nc(newdf, new_data[:,0,:],'argo_tanom','tanom',mlon,mlat, grid)
-    # save_nc(newdf, new_data[:,0,:],'argo_temp','temp',mlon,mlat, grid)
+    save_nc(newdf, new_data[:,0,:],'argo_tanom','tanom',mlon,mlat, grid)
+    save_nc(newdf, new_data[:,0,:],'argo_temp','temp',mlon,mlat, grid)
 
 
 if __name__ == '__main__':
