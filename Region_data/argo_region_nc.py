@@ -21,12 +21,10 @@ import dask.array as da
 
 
 def filter_data(data, lat, lon, time):
-    max_lat = max_lat
-    max_lon = max_lon+1
     filt = data[(data['date']>time[0])&(data['date']<time[1])]
     filt = filt[(filt['lat']>lat[0])&(filt['lat']<lat[1])]
-    filt = filt[(filt['lon']>lon[0])&(filt['lon']<lon[1])]
-    x_grid = np.arange(lon[0],lon[1],0.5)
+    filt = filt[(filt['lon']>lon[0])&(filt['lon']<lon[1]+1)]
+    x_grid = np.arange(lon[0],lon[1]+1,0.5)
     y_grid = np.arange(lat[0],lat[1],0.5)
     return filt, x_grid, y_grid
 
@@ -76,6 +74,10 @@ def save_nc(argodb, argo_data, filename, varname, lon, lat, grid,
     argo_data.to_netcdf(os.path.join(outdir,'{}_{:.1f}-{:.1f}.nc'.format(filename, lon, lat)))
 
 
+def get_fn(date, ARGO_DIR, temp):
+    return os.path.join(ARGO_DIR,temp.format(date))
+
+
 def setup_cluster():
     cluster = LocalCluster()
     client = Client(cluster)
@@ -85,18 +87,22 @@ def setup_cluster():
 def main(lat,lon,time):
     client = setup_cluster()
     print(client)
-    argodb = pd.read_csv('/home/grivera/GitLab/argo/Profiler_list/Output/latlontemp',
+    ARGO_DIR = '/data/datos/ARGO/data/'
+    argodb = pd.read_csv('/home/grivera/GitLab/argo/Profiler_list/Output/latlontemp.txt',
                         parse_dates=[0])
     grid = np.arange(0,2001,2.)
     newdf = filter_data(argodb,lat,lon,time)[0]
+    newdf['fname'] = newdf['date'].apply(get_fn,args=(ARGO_DIR,'{:%Y%m%d}_prof.nc'))
+    print(newdf.head())
     godas_clim = xr.open_dataset('/data/users/grivera/GODAS/godas_dayclim.nc')
-    new_data = dastack([get_temp_anom(r.fname,r.nprof,region_mean, grid) for r in newdf.itertuples()])
+    godas_clim = godas_clim.sel(lat=slice(lat[0],lat[1]),lon=slice(lon[0],lon[1])).mean(dim=['lat','lon'])
+    new_data = dastack([get_temp_anom(r.fname,r.nprof,godas_clim, grid) for r in newdf.iloc[:3].itertuples()])
     new_data = new_data.persist()
     progress(new_data)
     mlon = np.mean(lon)
     mlat = np.mean(lat)
-    save_nc(newdf, new_data[:,0,:],'argo_tanom','tanom',mlon,mlat, grid)
-    save_nc(newdf, new_data[:,0,:],'argo_temp','temp',mlon,mlat, grid)
+    # save_nc(newdf, new_data[:,0,:],'argo_tanom','tanom',mlon,mlat, grid)
+    # save_nc(newdf, new_data[:,0,:],'argo_temp','temp',mlon,mlat, grid)
 
 
 if __name__ == '__main__':
