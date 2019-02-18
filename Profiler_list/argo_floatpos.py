@@ -11,7 +11,6 @@ Copyright (c) 2018 Instituto Geofisico del Peru
 
 from dask.distributed import Client, LocalCluster, progress
 from dask import delayed, compute
-from dask.diagnostics import ProgressBar
 import dask.dataframe as dd
 import xarray as xr
 import pandas as pd
