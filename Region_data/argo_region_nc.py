@@ -76,7 +76,15 @@ def save_nc(argodb, argo_data, filename, varname, lon, lat, grid,
     argo_data.to_netcdf(os.path.join(outdir,'{}_{:.1f}-{:.1f}.nc'.format(filename, lon, lat)))
 
 
+def setup_cluster():
+    cluster = LocalCluster()
+    client = Client(cluster)
+    return client
+
+
 def main(lat,lon,time):
+    client = setup_cluster()
+    print(client)
     argodb = pd.read_csv('/home/grivera/GitLab/argo/Profiler_list/Output/latlontemp',
                         parse_dates=[0])
     grid = np.arange(0,2001,2.)
