@@ -66,8 +66,8 @@ def save_nc(argodb, argo_data, filename, varname, lon, lat, grid,
                                     'time':argodb.date.values,
                                     'level':grid.astype(np.int64)})
     argo_data = argo_data.resample(time='1D').asfreq()
-    argo_data.lon.attrs['units']='degrees_east'
-    argo_data.lat.attrs['units']='degrees_north'
+    argo_data.lon.attrs['units']='degrees_north'
+    argo_data.lat.attrs['units']='degrees_east'
     argo_data.level.attrs['units']='m'
     argo_data.to_netcdf(os.path.join(outdir,'{}_{:.1f}-{:.1f}.nc'.format(filename, lon, lat)))
 
@@ -98,11 +98,10 @@ def main(lat,lon,time):
     new_data = dastack([get_temp_anom(r.fname,r.nprof,godas_clim, grid) for r in newdf.itertuples()])
     new_data = new_data.persist()
     progress(new_data)
-    print(new_data)
     mlon = np.mean(lon)
     mlat = np.mean(lat)
     save_nc(newdf, new_data[:,0,:],'argo_tanom','tanom',mlon,mlat, grid)
-    save_nc(newdf, new_data[:,0,:],'argo_temp','temp',mlon,mlat, grid)
+    save_nc(newdf, new_data[:,1,:],'argo_temp','temp',mlon,mlat, grid)
 
 
 if __name__ == '__main__':
