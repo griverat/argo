@@ -29,8 +29,10 @@ def get_data(argo_file):
     date = np.repeat(pd.to_datetime(date).date(), len(lons))
     temp = argo_file.TEMP[:,0].data
     nprof = argo_file.N_PROF.data
-    df = {'date':date,'lat':lats,'lon':lons,'nprof':nprof,'temp':temp}
-    pairs = pd.DataFrame(df,columns=['date','lat','lon','nprof','temp'])
+    platfn = argo_file.PLATFORM_NUMBER.data.astype(int)
+    df = {'date':date, 'lat':lats, 'lon':lons, 
+            'nprof':nprof,'platfn':platfn,'temp':temp}
+    pairs = pd.DataFrame(df,columns=['date','lat','lon','nprof','platfn','temp'])
     return pairs
 
 
