@@ -41,7 +41,7 @@ def merge_data(list_df):
 
 
 def setup_cluster():
-    cluster = LocalCluster()
+    cluster = LocalCluster(n_workers=24)
     client = Client(cluster)
     return client
 
