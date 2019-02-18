@@ -3,3 +3,4 @@
 .vscode
 *slurm*
 *dask-worker*
+*logs
