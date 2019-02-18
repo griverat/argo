@@ -10,6 +10,7 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 """
 
 from dask.distributed import Client, LocalCluster, progress
+from scipy.interpolate import PchipInterpolator
 from dask import delayed
 import xarray as xr
 import numpy as np
@@ -29,7 +30,7 @@ def filter_data(data, lat, lon, time):
 
 @delayed
 def get_temp_anom(fname,prof,clim,grid):
-    data = xr.open_dataset(fname).load()
+    data = xr.open_dataset(fname)
     temp = data.TEMP[prof].data
     depth = gsw.conversions.z_from_p(data.PRES[prof],data.LATITUDE[prof])
     mask = ~np.isnan(temp)
@@ -39,18 +40,15 @@ def get_temp_anom(fname,prof,clim,grid):
     try:
         func = PchipInterpolator(-depth[mask],temp[mask])
     except:
-        # print('Error on file {}'.format(fname))
         return np.full_like(np.array([grid,grid]), np.nan, dtype=np.double)
     new_grid = np.where(grid>-depth[mask][-1],np.nan,grid)
     new_grid[np.where(grid<-depth[mask][0])] = np.nan
     new_data = func(new_grid)
     
     date = pd.to_datetime(data.JULD[prof].data).date()
-    lat = data.LATITUDE[prof].data
-    lon = data.LONGITUDE[prof].data
     day = clim.sel(time=date)
     day = day.interp(depth=grid)
-    return np.array([new_data - day.data + 273, new_data])
+    return np.array([new_data - day.data, new_data])
 
 
 @delayed
@@ -65,7 +63,6 @@ def save_nc(argodb, argo_data, filename, varname, lon, lat, grid,
                                     'lat':[lat],
                                     'time':argodb.date.values,
                                     'level':grid.astype(np.int64)})
-    print(argo_data)
     argo_data = argo_data.resample(time='1D').asfreq()
     argo_data.lon.attrs['units']='degrees_north'
     argo_data.lat.attrs['units']='degrees_east'
@@ -78,7 +75,7 @@ def get_fn(date, ARGO_DIR, temp):
 
 
 def setup_cluster():
-    cluster = LocalCluster()
+    cluster = LocalCluster(n_workers=24)
     client = Client(cluster)
     return client
 
@@ -90,22 +87,20 @@ def main(lat,lon,time):
     argodb = pd.read_csv('/home/grivera/GitLab/argo/Profiler_list/Output/latlontemp.txt',
                         parse_dates=[0])
     grid = np.arange(0,2001,2.)
+    
     newdf = filter_data(argodb,lat,lon,time)[0]
     newdf['fname'] = newdf['date'].apply(get_fn,args=(ARGO_DIR,'{:%Y%m%d}_prof.nc'))
     newdf = newdf.sort_values('date')
-    print(newdf.head())
-    godas_clim = xr.open_dataset('/data/users/grivera/GODAS/godas_dayclim.nc').pottmp
+    godas_clim = xr.open_dataset('/data/users/grivera/GODAS/godas_dayclim.nc').pottmp -273
     godas_clim = godas_clim.sel(lat=slice(lat[0],lat[1]),lon=slice(lon[0],lon[1])).mean(dim=['lat','lon'])
-    print(godas_clim)
-    new_data = dastack([get_temp_anom(r.fname,r.nprof,godas_clim, grid) for r in newdf.iloc[:3].itertuples()])
+
+    new_data = dastack([get_temp_anom(r.fname,r.nprof,godas_clim, grid) for r in newdf.itertuples()])
     new_data = new_data.persist()
     progress(new_data)
-    print(new_data.compute().compute().shape)
-    print(new_data[:,1,:].compute().compute())
-    # mlon = np.mean(lon)
-    # mlat = np.mean(lat)
-    # save_nc(newdf, new_data[:,0,:],'argo_tanom','tanom',mlon,mlat, grid)
-    # save_nc(newdf, new_data[:,1,:],'argo_temp','temp',mlon,mlat, grid)
+    mlon = np.mean(lon)
+    mlat = np.mean(lat)
+    save_nc(newdf, new_data[:,0,:],'argo_tanom','tanom',mlon,mlat, grid)
+    save_nc(newdf, new_data[:,1,:],'argo_temp','temp',mlon,mlat, grid)
 
 
 if __name__ == '__main__':
