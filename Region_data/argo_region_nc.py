@@ -65,6 +65,7 @@ def save_nc(argodb, argo_data, filename, varname, lon, lat, grid,
                                     'lat':[lat],
                                     'time':argodb.date.values,
                                     'level':grid.astype(np.int64)})
+    print(argo_data)
     argo_data = argo_data.resample(time='1D').asfreq()
     argo_data.lon.attrs['units']='degrees_north'
     argo_data.lat.attrs['units']='degrees_east'
@@ -93,7 +94,7 @@ def main(lat,lon,time):
     newdf['fname'] = newdf['date'].apply(get_fn,args=(ARGO_DIR,'{:%Y%m%d}_prof.nc'))
     newdf = newdf.sort_values('date')
     print(newdf.head())
-    godas_clim = xr.open_dataset('/data/users/grivera/GODAS/godas_dayclim.nc')
+    godas_clim = xr.open_dataset('/data/users/grivera/GODAS/godas_dayclim.nc').pottmp
     godas_clim = godas_clim.sel(lat=slice(lat[0],lat[1]),lon=slice(lon[0],lon[1])).mean(dim=['lat','lon'])
     new_data = dastack([get_temp_anom(r.fname,r.nprof,godas_clim, grid) for r in newdf.itertuples()])
     new_data = new_data.persist()
