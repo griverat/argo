@@ -56,6 +56,10 @@ def dastack(data):
     return da.stack(data,axis=0)
 
 
+def update_nc():
+    pass
+
+
 def save_nc(argodb, argo_data, filename, varname, lon, lat, grid,
             outdir='/data/users/grivera/ARGO-patch'):
     argo_data = xr.Dataset({varname:(['lat','lon','time','level'],np.array([[argo_data.compute().compute()]]))},
