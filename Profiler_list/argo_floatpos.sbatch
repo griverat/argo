@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --partition mpi_short2
 #SBATCH --nodes 1
-#SBATCH --ntasks-per-node 24
+#SBATCH --ntasks-per-node 12
 #SBATCH --time 00:30:00
 #SBATCH --mem-per-cpu 4000
 #SBATCH --job-name argo_floatpos

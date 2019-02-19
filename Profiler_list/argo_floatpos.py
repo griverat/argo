@@ -41,7 +41,7 @@ def merge_data(list_df):
 
 
 def setup_cluster():
-    cluster = LocalCluster(n_workers=24)
+    cluster = LocalCluster(n_workers=12, threads_per_worker=2, scheduler_port=0, diagnostics_port=0)
     client = Client(cluster)
     return client
 
@@ -49,7 +49,7 @@ def setup_cluster():
 def update_data(argo_files, filename='latlontemp.txt',outdir=os.getcwd()):
     to_update = pd.read_csv(os.path.join(outdir,filename),
                             parse_dates=[0])
-    last_date = to_update.iloc[-1]['date'] - pd.DateOffset(10,'D')
+    last_date = to_update.iloc[-1]['date'] - pd.DateOffset(20,'D')
     to_update = to_update.drop(to_update[to_update['date']>=last_date].index)
     ix = [i for i,s in enumerate(argo_files) if '{:%Y%m%d}'.format(last_date) in s]
     files = argo_files[ix[0]:]
