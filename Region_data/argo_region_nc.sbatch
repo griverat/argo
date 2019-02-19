@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --partition mpi_short2
 #SBATCH --nodes 1
-#SBATCH --ntasks-per-node 24
+#SBATCH --ntasks-per-node 12
 #SBATCH --time 00:30:00
 #SBATCH --job-name ARGO_region_nc
 #SBATCH --output logs/argo_region_nc-%J.txt
