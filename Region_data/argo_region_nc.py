@@ -62,12 +62,17 @@ def update_nc():
 
 def save_nc(argodb, argo_data, filename, varname, lon, lat, grid,
             outdir='/data/users/grivera/ARGO-patch'):
-    argo_data = xr.Dataset({varname:(['lat','lon','time','level'],np.array([[argo_data.compute().compute()]]))},
+    argo_count = argodb.groupby('time').size().resample('1D').asfreq().values
+    argo_data = xr.DataArray(argo_data.compute().compute(),
+                            coords=[argodb.date.values,grid.astype(np.int64)],
+                            dims=['time','level'])
+    argo_data = argo_data.resample(time='1D').mean(dim='time')
+    argo_data = xr.Dataset({varname:(['lat','lon','time','level'],np.array([[argo_data.data]])),
+                            'prof_count':(['lat','lon','time'],np.array([[argo_count]]))},
                             coords={'lon':[lon],
                                     'lat':[lat],
-                                    'time':argodb.date.values,
+                                    'time':argo_data.date.values,
                                     'level':grid.astype(np.int64)})
-    argo_data = argo_data.resample(time='1D').asfreq()
     argo_data.lon.attrs['units']='degrees_north'
     argo_data.lat.attrs['units']='degrees_east'
     argo_data.level.attrs['units']='m'
@@ -79,7 +84,7 @@ def get_fn(date, ARGO_DIR, temp):
 
 
 def setup_cluster():
-    cluster = LocalCluster(n_workers=24)
+    cluster = LocalCluster(n_workers=12, threads_per_worker=2, scheduler_port=0, diagnostics_port=0)
     client = Client(cluster)
     return client
 
