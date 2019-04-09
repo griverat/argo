@@ -16,13 +16,13 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 import dask.array as da
-import os
+import os, sys
 import gsw
 
 def filter_data(data, lat, lon, time):
-    filt = data[(data['date']>time[0])&(data['date']<time[1])]
-    filt = filt[(filt['lat']>lat[0])&(filt['lat']<lat[1])]
-    filt = filt[(filt['lon']>lon[0])&(filt['lon']<lon[1]+1)]
+    filt = data[(data['date']>=time[0])&(data['date']<=time[1])]
+    filt = filt[(filt['lat']>=lat[0])&(filt['lat']<=lat[1])]
+    filt = filt[(filt['lon']>=lon[0])&(filt['lon']<=lon[1])]
     x_grid = np.arange(lon[0],lon[1]+1,0.5)
     y_grid = np.arange(lat[0],lat[1],0.5)
     return filt, x_grid, y_grid
@@ -47,7 +47,7 @@ def get_temp_anom(fname,prof,clim,grid):
     
     date = pd.to_datetime(data.JULD[prof].data).date()
     day = clim.sel(time=date)
-    day = day.interp(depth=grid)
+    day = day.interp(level=grid)
     return np.array([new_data - day.data, new_data])
 
 
@@ -62,21 +62,23 @@ def update_nc():
 
 def save_nc(argodb, argo_data, filename, varname, lon, lat, grid,
             outdir='/data/users/grivera/ARGO-patch'):
-    argo_count = argodb.groupby('time').size().resample('1D').asfreq().values
+    argo_count = argodb.groupby('date').size().resample('1D').asfreq().values
     argo_data = xr.DataArray(argo_data.compute().compute(),
                             coords=[argodb.date.values,grid.astype(np.int64)],
-                            dims=['time','level'])
-    argo_data = argo_data.resample(time='1D').mean(dim='time')
+                            dims=['time','level']).resample(time='1D').mean(dim='time')
+    mlon = np.mean(lon)
+    mlat = np.mean(lat)
     argo_data = xr.Dataset({varname:(['lat','lon','time','level'],np.array([[argo_data.data]])),
                             'prof_count':(['lat','lon','time'],np.array([[argo_count]]))},
-                            coords={'lon':[lon],
-                                    'lat':[lat],
-                                    'time':argo_data.date.values,
+                            coords={'lon':[mlon],
+                                    'lat':[mlat],
+                                    'time':argo_data.time.values,
                                     'level':grid.astype(np.int64)})
     argo_data.lon.attrs['units']='degrees_north'
     argo_data.lat.attrs['units']='degrees_east'
     argo_data.level.attrs['units']='m'
-    argo_data.to_netcdf(os.path.join(outdir,'{}_{:.1f}-{:.1f}.nc'.format(filename, lon, lat)))
+    argo_data.attrs['author']='SCAH - IGP'
+    argo_data.to_netcdf(os.path.join(outdir,'{}_{:.1f},{:.1f}_{:.1f},{:.1f}.nc'.format(filename,lon[0],lon[1],lat[0],lat[1])))
 
 
 def get_fn(date, ARGO_DIR, temp):
@@ -96,21 +98,23 @@ def main(lat,lon,time):
     argodb = pd.read_csv('/home/grivera/GitLab/argo/Profiler_list/Output/latlontemp.txt',
                         parse_dates=[0])
     grid = np.arange(0,2001,2.)
-    
     newdf = filter_data(argodb,lat,lon,time)[0]
     newdf['fname'] = newdf['date'].apply(get_fn,args=(ARGO_DIR,'{:%Y%m%d}_prof.nc'))
     newdf = newdf.sort_values('date')
-    godas_clim = xr.open_dataset('/data/users/grivera/GODAS/godas_dayclim.nc').pottmp -273
-    godas_clim = godas_clim.sel(lat=slice(lat[0],lat[1]),lon=slice(lon[0],lon[1])).mean(dim=['lat','lon'])
-
+    godas_clim = xr.open_mfdataset('/data/users/grivera/GODAS/clim/daily/*.godas_dayclim.nc').pottmp -273
+    godas_clim = godas_clim.sel(time=slice('{:%Y-%m-%d}'.format(newdf.date.iloc[0]),'{:%Y-%m-%d}'.format(newdf.date.iloc[-1])), 
+                                lat=slice(lat[0],lat[1]), 
+                                lon=slice(lon[0],lon[1])).mean(dim=['lat','lon']).load()
     new_data = dastack([get_temp_anom(r.fname,r.nprof,godas_clim, grid) for r in newdf.itertuples()])
     new_data = new_data.persist()
     progress(new_data)
-    mlon = np.mean(lon)
-    mlat = np.mean(lat)
-    save_nc(newdf, new_data[:,0,:],'argo_tanom','tanom',mlon,mlat, grid)
-    save_nc(newdf, new_data[:,1,:],'argo_temp','temp',mlon,mlat, grid)
+    save_nc(newdf, new_data[:,0,:],'argo_tanom','tanom',lon,lat, grid)
+    save_nc(newdf, new_data[:,1,:],'argo_temp','temp',lon,lat, grid)
 
 
 if __name__ == '__main__':
-    main([-2.5,2.5],[253,260],['1999-01-01', '2019-02-13'])
+    lats = [float(sys.argv[1]), float(sys.argv[2])]
+    lons = [float(sys.argv[3]), float(sys.argv[4])]
+    tran = [str(sys.argv[5]), str(sys.argv[6])]
+    main(lats, lons, tran)
+    #main([-2.5,2.5],[253,260],['1999-01-01', '2019-03-14'])
