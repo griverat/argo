@@ -38,11 +38,14 @@ class DistPlot(object):
         self.ax.xaxis.set_major_formatter(lon_formatter)
         self.ax.yaxis.set_major_formatter(lat_formatter)
 
-    def plot(self,lats,lons):
-        self.ax.add_patch(mpatches.Rectangle(xy=[-90, -10], width=10, height=10,
+    def plot(self, plats, plons, lats,lons):
+        self.ax.add_patch(mpatches.Rectangle(xy=[lons[0], lats[0]],
+                                            width=lons[1]-lons[0], 
+                                            height=lats[1]-lats[0],
                                             facecolor='black',
                                             alpha=0.1,
-                                            transform=ccrs.PlateCarree()))
+                                            transform=ccrs.PlateCarree(),
+                                            zorder=0))
         self.ax.grid(alpha=0.5,ls='--')
 
         hq_border = cfeature.NaturalEarthFeature(
@@ -52,14 +55,16 @@ class DistPlot(object):
                                     facecolor=cfeature.COLORS['land'],
                                     edgecolor='black')
         self.ax.add_feature(hq_border)
-        self.ax.set_extent([lons[0],lons[1],lats[0],lats[1]], crs=self.proj)
+        self.ax.set_extent([plons[0],plons[1],plats[0],plats[1]], crs=self.proj)
 
         uniq = list(set(self.data.date))
         uniq.sort()
-        clmap = plt.get_cmap('nipy_spectral')
+        clmap = plt.get_cmap('hot')
         cNorm  = colors.Normalize(vmin=0, vmax=len(uniq))
         scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=clmap)
 
+        # marker = itertools.cycle(('P', 'X', 'H', 'v', 'd', 's', 'o', '*'))
+        marker = itertools.cycle([(i+3,0,i*60) for i in range(4)]*len(uniq))
         for i in range(len(uniq)):
             indx = self.data.date == uniq[i]
             if (i < 4) & (i>=1):
@@ -69,11 +74,11 @@ class DistPlot(object):
             else:
                 mar = 'H'
             self.ax.scatter(self.data['lon'][indx], self.data['lat'][indx],
-                            s=(i+2)*(i+1)*len(uniq),marker = mar,alpha=0.8,
+                            s=(i+6)**2.2,marker = next(marker),alpha=0.8,
                             color=scalarMap.to_rgba(i), edgecolor='k',lw=1,
                             transform=ccrs.PlateCarree(), label=uniq[i].date())
         
-        self.ax.legend(loc='upper left',fontsize='x-large',frameon=True, fancybox=True, edgecolor='k')
+        self.ax.legend(fontsize='x-large',frameon=True, fancybox=True, edgecolor='k')
         # ax.gridlines(crs=ccrs.PlateCarree(), linewidth=2, color='black', alpha=0.5, linestyle='--', draw_labels=False)
         # cbar = plt.colorbar(draw, ticks = np.arange(np.min(H),np.max(H),10))
         # cbar.ax.tick_params(labelsize=15)  ro, nara, amaril ,cel ,azul
@@ -101,9 +106,9 @@ def filter_data(argodb, lat, lon, tdelta=10, tdate=False):
 
 def main(plats,plons, lats, lons, ARGODB_DIR = '/data/users/grivera/ARGO-latlon'):
     argodb = read_argodb(ARGODB_DIR)
-    argodb = filter_data(argodb,lats,lons,tdate=['2019-02-01','2019-02-15'])
+    argodb = filter_data(argodb,lats,lons,tdate=['2019-02-01','2019-02-21'])
     region_dist = DistPlot(argodb)
-    region_dist.plot(plats,plons)
+    region_dist.plot(plats,plons,lats,lons)
     region_dist.show()
 
 
