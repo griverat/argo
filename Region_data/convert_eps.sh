@@ -1,5 +1,5 @@
 #!/bin/bash 
-
+cd Output
 files='*.eps'
 for line in ${files}
 do
