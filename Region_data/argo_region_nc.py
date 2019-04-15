@@ -10,6 +10,7 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 """
 
 from dask.distributed import Client, LocalCluster, progress
+from dask_jobqueue import SLURMCluster
 from scipy.interpolate import PchipInterpolator
 from dask import delayed
 import xarray as xr
@@ -86,7 +87,9 @@ def get_fn(date, ARGO_DIR, temp):
 
 
 def setup_cluster():
-    cluster = LocalCluster(n_workers=12, threads_per_worker=2, scheduler_port=0, diagnostics_port=0)
+    cluster = SLURMCluster(queue='any2', cores=12, memory='48GB', processes=6)
+#    cluster = LocalCluster(n_workers=12, threads_per_worker=2, scheduler_port=0, diagnostics_port=0)
+    cluster.scale(24)
     client = Client(cluster)
     return client
 
@@ -101,10 +104,12 @@ def main(lat,lon,time):
     newdf = filter_data(argodb,lat,lon,time)[0]
     newdf['fname'] = newdf['date'].apply(get_fn,args=(ARGO_DIR,'{:%Y%m%d}_prof.nc'))
     newdf = newdf.sort_values('date')
+    print('\nLoading GODAS climatology from {:%Y-%m-%d} to {:%Y-%m-%d}'.format(newdf.date.iloc[0],newdf.date.iloc[-1]))
     godas_clim = xr.open_mfdataset('/data/users/grivera/GODAS/clim/daily/*.godas_dayclim.nc').pottmp -273
     godas_clim = godas_clim.sel(time=slice('{:%Y-%m-%d}'.format(newdf.date.iloc[0]),'{:%Y-%m-%d}'.format(newdf.date.iloc[-1])), 
                                 lat=slice(lat[0],lat[1]), 
                                 lon=slice(lon[0],lon[1])).mean(dim=['lat','lon']).load()
+    print('Done\n')
     new_data = dastack([get_temp_anom(r.fname,r.nprof,godas_clim, grid) for r in newdf.itertuples()])
     new_data = new_data.persist()
     progress(new_data)
