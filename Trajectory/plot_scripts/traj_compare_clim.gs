@@ -86,7 +86,7 @@ date=substr(tf5,4,9)
 
 'set strsiz 0.15 0.2'
 'set string 1 c 5'
-'draw string 5.5 8.14 ARGO Profiler #3901231 near Paita'
+'draw string 5.5 8.14 ARGO Profiler #3901231'
 
 'set strsiz 0.093 0.1'
 'set string 1 l 6'
