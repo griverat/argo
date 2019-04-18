@@ -7,8 +7,8 @@
 outdir='../Output/'
 name='argo_anomcomp'
 
-time1='15apr2018'
-time2='15apr2019'
+time1='16apr2018'
+time2='16apr2019'
 
 **********
 'xdfopen /data/users/grivera/GODAS/clim/godas_dayclim.ctl'
