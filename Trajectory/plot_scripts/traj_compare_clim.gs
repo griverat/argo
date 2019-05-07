@@ -7,8 +7,8 @@
 outdir='../Output/'
 name='prof3901231_paita_clim'
 
-time1='12apr2018'
-time2='12apr2019'
+time1='21apr2018'
+time2='21apr2019'
 
 opt='0.3 0.6 0.7 2 0.4'
 clev='-6 -5 -4 -3 -2 -1 -0.5 0.5 1  2  3  4  5  6'
