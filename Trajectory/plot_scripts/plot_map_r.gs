@@ -5,7 +5,7 @@
 'rgbset2'
 
 outdir='../Output/'
-name='prof3901231_paita_clim_trajr'
+name='prof3901231_clim_trajr'
 
 iso=16
 
@@ -15,9 +15,9 @@ ccols='49 48  47 46 44 42 41   0  21 22 24 26 27 28 29'
 cols='6 2 8 12 7 10 3 13 5 11 4 14 9'
 colstraj='9 14 4 11 5 13 3 10 7 12 8 2 6'
 
-'sdfopen /data/users/grivera/ARGO-prof/3901231_paita_godas.nc'
-'sdfopen /data/users/grivera/ARGO-prof/3901231_paita_soda.nc'
-'sdfopen /data/users/grivera/ARGO-prof/3901231_paita_imarpe.nc'
+'sdfopen /data/users/grivera/ARGO-prof/3901231_godas.nc'
+'sdfopen /data/users/grivera/ARGO-prof/3901231_soda.nc'
+'sdfopen /data/users/grivera/ARGO-prof/3901231_imarpe.nc'
 'xdfopen /data/users/grivera/GODAS/clim/godas_dayclim.ctl'
 
 ***************

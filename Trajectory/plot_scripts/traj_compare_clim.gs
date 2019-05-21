@@ -5,7 +5,7 @@
 'rgbset2'
 
 outdir='../Output/'
-name='prof3901231_paita_clim'
+name='prof3901231_clim'
 
 time1='21apr2018'
 time2='21apr2019'
@@ -14,9 +14,9 @@ opt='0.3 0.6 0.7 2 0.4'
 clev='-6 -5 -4 -3 -2 -1 -0.5 0.5 1  2  3  4  5  6'
 ccols='49 48  47 46 44 42 41   0  21 22 24 26 27 28 29'
 
-'sdfopen /data/users/grivera/ARGO-prof/3901231_paita_godas.nc'
-'sdfopen /data/users/grivera/ARGO-prof/3901231_paita_soda.nc'
-'sdfopen /data/users/grivera/ARGO-prof/3901231_paita_imarpe.nc'
+'sdfopen /data/users/grivera/ARGO-prof/3901231_godas.nc'
+'sdfopen /data/users/grivera/ARGO-prof/3901231_soda.nc'
+'sdfopen /data/users/grivera/ARGO-prof/3901231_imarpe.nc'
 
 'set x 1'
 'set y 1'
