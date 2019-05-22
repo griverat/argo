@@ -14,11 +14,12 @@ import pandas as pd
 import numpy as np
 
 
-def filter_date(prof,argodb,days):
+def filter_date(prof,argo_db,days):
     delta = pd.Timedelta(days,'D')
-    today = pd.to_datetime(datetime.today())
+    argo_db = argo_db.query('(platfn==@prof)')
+    today = argo_db.date.iloc[-1]
     st_date = today-delta
-    filtered = argo_db.query('(platfn==@prof)&(date>@st_date)&(lat>-10)&(lat<0)&(lon>270)&(lon<290)').reset_index(drop=True)[['date','lat','lon']]
+    filtered = argo_db.query('(date>@st_date)&(lat>-10)&(lat<0)&(lon>270)&(lon<290)').reset_index(drop=True)[['date','lat','lon']]
     return filtered
 
 
