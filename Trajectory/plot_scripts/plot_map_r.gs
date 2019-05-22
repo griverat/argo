@@ -290,6 +290,7 @@ xi=subwrd(result,3); yi=subwrd(result,6)
 
 ************
 'gxprint 'outdir''name''iso'_'datef'.eps'
+'gxprint 'outdir''name''iso'_latest.eps'
 
 
 
