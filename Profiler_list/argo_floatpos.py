@@ -20,18 +20,18 @@ import os
 
 @delayed
 def get_data(argo_file):
-    argo_file = xr.open_dataset(argo_file)
+    with xr.open_dataset(argo_file) as argo_file:
+        argo_file = argo_file.load()
     lats = argo_file.LATITUDE.data
     lons = argo_file.LONGITUDE.data
     lons = np.where(lons<0, lons+360,lons)
     date = argo_file.JULD.data[0]
     date = np.repeat(pd.to_datetime(date).date(), len(lons))
-    temp = argo_file.TEMP[:,0].data
     nprof = argo_file.N_PROF.data
     platfn = argo_file.PLATFORM_NUMBER.data.astype(int)
     df = {'date':date, 'lat':lats, 'lon':lons, 
-            'nprof':nprof,'platfn':platfn,'temp':temp}
-    pairs = pd.DataFrame(df,columns=['date','lat','lon','nprof','platfn','temp'])
+            'nprof':nprof,'platfn':platfn}
+    pairs = pd.DataFrame(df,columns=['date','lat','lon','nprof','platfn'])
     return pairs
 
 
@@ -41,7 +41,7 @@ def merge_data(list_df):
 
 
 def setup_cluster():
-    cluster = LocalCluster(n_workers=12, threads_per_worker=2, scheduler_port=0, diagnostics_port=0)
+    cluster = LocalCluster(n_workers=6, threads_per_worker=1)
     client = Client(cluster)
     return client
 
@@ -51,12 +51,11 @@ def update_data(argo_files, filename='latlontemp.txt',outdir=os.getcwd()):
                             parse_dates=[0])
     last_date = to_update.iloc[-1]['date'] - pd.DateOffset(60,'D')
     to_update = to_update.drop(to_update[to_update['date']>=last_date].index)
+    to_update = dd.from_pandas(to_update,10)
     ix = [i for i,s in enumerate(argo_files) if '{:%Y%m%d}'.format(last_date) in s]
     files = argo_files[ix[0]:]
-    new_data = merge_data([get_data(argof) for argof in files])
-    new_data = new_data.persist()
-    progress(new_data)
-    new_data = pd.concat([to_update,new_data.compute()])
+    new_data = merge_data([to_update,
+                           merge_data([get_data(argof) for argof in files])])
     return new_data
 
 
@@ -68,12 +67,16 @@ def main(update=False,outdir=os.getcwd(), ARGO_DIR='/data/datos/ARGO/data/'):
     print(client)
     if update:
         updated_data = update_data(argo_files,outdir=outdir)
-        updated_data.to_csv(os.path.join(outdir,'latlontemp.txt'), index=False)
+        updated_data = updated_data.persist()
+        progress(updated_data)
+        updated_data.to_csv(os.path.join(outdir,'latlontemp.txt'),
+                            index=False)
     else:
         data = merge_data([get_data(argof) for argof in argo_files])
         data = data.persist()
         progress(data)
-        data.compute().to_csv(os.path.join(outdir,'latlontemp.txt'), index=False)
+        data.to_csv(os.path.join(outdir,'latlontemp.txt'),
+                    index=False).compute()
 
 
 if __name__ == '__main__':
