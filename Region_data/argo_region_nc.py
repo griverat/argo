@@ -10,7 +10,6 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 """
 
 from dask.distributed import Client, LocalCluster, progress
-from dask_jobqueue import SLURMCluster
 from scipy.interpolate import PchipInterpolator
 from dask import delayed
 import xarray as xr
@@ -21,12 +20,9 @@ import os, sys
 import gsw
 
 def filter_data(data, lat, lon, time):
-    filt = data[(data['date']>=time[0])&(data['date']<=time[1])]
-    filt = filt[(filt['lat']>=lat[0])&(filt['lat']<=lat[1])]
-    filt = filt[(filt['lon']>=lon[0])&(filt['lon']<=lon[1])]
-    x_grid = np.arange(lon[0],lon[1]+1,0.5)
-    y_grid = np.arange(lat[0],lat[1],0.5)
-    return filt, x_grid, y_grid
+    filt = data.query('(date>=@time[0])&(date<=@time[1])')
+    filt = filt.query('(lat>=@lat[0])&(lat<=@lat[1])&(lon>=@lon[0])&(lon<=@lon[1])')
+    return filt
 
 
 @delayed
@@ -87,9 +83,7 @@ def get_fn(date, ARGO_DIR, temp):
 
 
 def setup_cluster():
-    cluster = SLURMCluster(queue='any2', cores=12, memory='48GB', processes=6)
-#    cluster = LocalCluster(n_workers=12, threads_per_worker=2, scheduler_port=0, diagnostics_port=0)
-    cluster.scale(24)
+    cluster = LocalCluster(n_workers=6, threads_per_worker=1)
     client = Client(cluster)
     return client
 
@@ -101,7 +95,7 @@ def main(lat,lon,time):
     argodb = pd.read_csv('/home/grivera/GitLab/argo/Profiler_list/Output/latlontemp.txt',
                         parse_dates=[0])
     grid = np.arange(0,2001,2.)
-    newdf = filter_data(argodb,lat,lon,time)[0]
+    newdf = filter_data(argodb,lat,lon,time)
     newdf['fname'] = newdf['date'].apply(get_fn,args=(ARGO_DIR,'{:%Y%m%d}_prof.nc'))
     newdf = newdf.sort_values('date')
     print('\nLoading GODAS climatology from {:%Y-%m-%d} to {:%Y-%m-%d}'.format(newdf.date.iloc[0],newdf.date.iloc[-1]))
