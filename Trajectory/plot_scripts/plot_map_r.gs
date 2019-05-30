@@ -12,8 +12,8 @@ iso=16
 opt='0.8 0.6 0.8 2 0.6 0.8'
 clev='-6 -5 -4 -3 -2 -1 -0.5 0.5 1  2  3  4  5  6'
 ccols='49 48  47 46 44 42 41   0  21 22 24 26 27 28 29'
-cols='6 2 8 12 7 10 3 13 5 11 4 14 9'
-colstraj='9 14 4 11 5 13 3 10 7 12 8 2 6'
+cols= '6 2 8 12 7 10 3 13 5 11 4 14 9'
+colstraj=' 14 4 11 5 13 3 10 7 12 8 2 6'
 
 'sdfopen /data/users/grivera/ARGO-prof/3901231_godas.nc'
 'sdfopen /data/users/grivera/ARGO-prof/3901231_soda.nc'
@@ -86,6 +86,19 @@ while (timeinum < timefnum_)
     xf=xi; yf=yi; ncol=ncol+1
 endwhile
 
+status=0
+'set line 1 1 5'
+while (status != 2)
+    marks = read('/data/users/grivera/ARGO-prof/3901231-traj1.txt')
+    status = subwrd(marks,1)
+    if (status=2)
+        break
+    endif
+    datepoint=subwrd(marks,6)
+    'q w2xy 'datepoint' 500'
+    xi=subwrd(result,3); yi=subwrd(result,6)
+    'draw mark 4 'xi' 'yi' 0.05'
+endwhile
 
 *********************************
 'set time 'datei' 'datef
@@ -135,6 +148,19 @@ while (timeinum < timefnum_)
     xf=xi; yf=yi; ncol=ncol+1
 endwhile
 
+status=0
+'set line 1 1 5'
+while (status != 2)
+    marks = read('/data/users/grivera/ARGO-prof/3901231-traj2.txt')
+    status = subwrd(marks,1)
+    if (status=2)
+        break
+    endif
+    datepoint=subwrd(marks,6)
+    'q w2xy 'datepoint' 500'
+    xi=subwrd(result,3); yi=subwrd(result,6)
+    'draw mark 4 'xi' 'yi' 0.05'
+endwhile
 
 *********************************
 'set time 'datei' 'datef
@@ -186,6 +212,19 @@ while (timeinum < timefnum_)
     xf=xi; yf=yi; ncol=ncol+1
 endwhile
 
+status=0
+'set line 1 1 5'
+while (status != 2)
+    marks = read('/data/users/grivera/ARGO-prof/3901231-traj3.txt')
+    status = subwrd(marks,1)
+    if (status=2)
+        break
+    endif
+    datepoint=subwrd(marks,6)
+    'q w2xy 'datepoint' 500'
+    xi=subwrd(result,3); yi=subwrd(result,6)
+    'draw mark 4 'xi' 'yi' 0.05'
+endwhile
 
 *********************************
 'set dfile 4'
@@ -205,14 +244,18 @@ endwhile
 'set ccols 0 0'
 'd pottmp.4'
 
-status = 0
+status=0
 plat=0
 plon=0
 ncol=1
 n=0
 col = 9
 while (status != 2)
-    marks = read('/data/users/grivera/ARGO-prof/3901231-traj1.txt')
+    marks = read('/data/users/grivera/ARGO-prof/3901231-traj4.txt')
+    status = subwrd(marks,1)
+    if (status=2)
+        break
+    endif
     lat = subwrd(marks,3)
     lon = subwrd(marks,4)
     class = subwrd(marks,5)
@@ -225,10 +268,9 @@ while (status != 2)
         pclass=class
     endif
     if (plat!=0)
-        'set line 'col
+        'set line 'col' 1 10'
         'drawpoly opened -by world 'plon' 'plat' 'lon' 'lat
     endif
-    status = subwrd(marks,1)
     plat=lat
     plon=lon
     n=n+1
@@ -262,7 +304,7 @@ endwhile
 st=0
 k=0
 while (st != 2)
-    mark = read('/data/users/grivera/ARGO-prof/3901231-traj2.txt')
+    mark = read('/data/users/grivera/ARGO-prof/3901231-traj5.txt')
     st = subwrd(mark,1)
     if (st=2)
         break
