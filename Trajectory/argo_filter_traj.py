@@ -37,7 +37,7 @@ def build_ts(end_date,tbefore,days):
     return date_lims
 
 
-def group_dates2(filter_db,day_thres):
+def group_dates(filter_db,day_thres):
     today = pd.to_datetime(datetime.today().replace(hour=0,minute=0,second=0,microsecond=0))
     date_ranges = build_ts(today, 365, 30)
     for i in range(len(date_ranges)):
@@ -54,11 +54,29 @@ def group_dates2(filter_db,day_thres):
     return filter_db
 
 
+def check_update(old_file,new_date):
+    try:
+        old_data = pd.read_csv(old_file, sep=' ', parse_dates=[0])
+    except:
+        print("Old file not found.\nCreating file")
+        return True
+    old_date = old_data.iloc[-1,0]
+    if old_date == new_date:
+        print("No new data found")
+        return False
+    else:
+        print("New data found")
+        return True
+
+
 if __name__ == "__main__":
     prof_list = np.loadtxt('/home/grivera/GitLab/argo/Output/paita.txt', dtype=int)
-    argo_db = pd.read_csv('/data/users/grivera/ARGO-latlon/latlontemp.txt',parse_dates=[0]).sort_values('date').reset_index(drop=True)
+    argo_db = pd.read_csv('/data/users/grivera/ARGO-latlon/latlontemp.txt',
+                            parse_dates=[0]).sort_values('date').reset_index(drop=True)
     argo_filter = filter_date(prof_list,argo_db,365)
-    argo_filter = group_dates2(argo_filter,30)
-    for i in range(1,3):
-        filename = '/data/users/grivera/ARGO-prof/{}-traj{}.txt'.format(prof_list,i)
-        argo_filter.to_csv(filename,header=None,index=None,sep=' ',float_format='%.5f')
+    argo_filter = group_dates(argo_filter,30)
+    filename = '/data/users/grivera/ARGO-prof/{}-traj{}.txt'
+    if check_update(filename.format(prof_list,1),argo_filter.date.iloc[-1]):
+        for i in range(1,3):
+            argo_filter.to_csv(filename.format(prof_list,i), header=None, index=None, sep=' ',
+                            float_format='%.5f')
