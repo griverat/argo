@@ -26,13 +26,14 @@ def filter_data(data, lat, lon, time):
 
 
 @delayed
-def get_temp_anom(fname,prof,clim,grid):
-    data = xr.open_dataset(fname)
+def get_temp_anom(fname,prof,clim,grid=np.arange(0,2001,2.)):
+    with xr.open_dataset(fname) as data:
+        data = data.load()
     temp = data.TEMP[prof].data
     depth = gsw.conversions.z_from_p(data.PRES[prof],data.LATITUDE[prof])
     mask = ~np.isnan(temp)
     mask[np.where(depth == 0)] = False
-    if temp[mask].size ==1:
+    if temp[mask].size <=30:
         return np.full_like(np.array([grid,grid]), np.nan, dtype=np.double)
     try:
         func = PchipInterpolator(-depth[mask],temp[mask])
@@ -43,9 +44,8 @@ def get_temp_anom(fname,prof,clim,grid):
     new_data = func(new_grid)
     
     date = pd.to_datetime(data.JULD[prof].data).date()
-    day = clim.sel(time=date)
-    day = day.interp(level=grid)
-    return np.array([new_data - day.data, new_data])
+    day = clim.interp(level=grid)
+    return da.from_array(np.array([new_data - day.data, new_data]),chunks=(100,100))
 
 
 @delayed
@@ -59,8 +59,9 @@ def update_nc():
 
 def save_nc(argodb, argo_data, filename, varname, lon, lat, grid,
             outdir='/data/users/grivera/ARGO-patch'):
+    argo_data = argo_data.compute()
     argo_count = argodb.groupby('date').size().resample('1D').asfreq().values
-    argo_data = xr.DataArray(argo_data.compute().compute(),
+    argo_data = xr.DataArray(argo_data,
                             coords=[argodb.date.values,grid.astype(np.int64)],
                             dims=['time','level']).resample(time='1D').mean(dim='time')
     mlon = np.mean(lon)
@@ -96,17 +97,18 @@ def main(lat,lon,time):
                         parse_dates=[0])
     grid = np.arange(0,2001,2.)
     newdf = filter_data(argodb,lat,lon,time)
-    newdf['fname'] = newdf['date'].apply(get_fn,args=(ARGO_DIR,'{:%Y%m%d}_prof.nc'))
+    newdf.loc[:,'fname'] = newdf['date'].apply(get_fn,args=(ARGO_DIR,'{:%Y%m%d}_prof.nc'))
     newdf = newdf.sort_values('date')
     print('\nLoading GODAS climatology from {:%Y-%m-%d} to {:%Y-%m-%d}'.format(newdf.date.iloc[0],newdf.date.iloc[-1]))
-    godas_clim = xr.open_mfdataset('/data/users/grivera/GODAS/clim/daily/*.godas_dayclim.nc').pottmp -273
+    godas_clim = xr.open_mfdataset('/data/users/grivera/GODAS/clim/daily/*.godas_dayclim.nc',parallel=True).pottmp -273
     godas_clim = godas_clim.sel(time=slice('{:%Y-%m-%d}'.format(newdf.date.iloc[0]),'{:%Y-%m-%d}'.format(newdf.date.iloc[-1])), 
                                 lat=slice(lat[0],lat[1]), 
                                 lon=slice(lon[0],lon[1])).mean(dim=['lat','lon']).load()
-    print('Done\n')
-    new_data = dastack([get_temp_anom(r.fname,r.nprof,godas_clim, grid) for r in newdf.itertuples()])
+    print('Done \n')
+    new_data = dastack([get_temp_anom(r.fname,r.nprof,godas_clim.sel(time='{:%Y-%m-%d}'.format(r.date))) for r in newdf.itertuples()])
     new_data = new_data.persist()
     progress(new_data)
+    new_data = new_data.compute()
     save_nc(newdf, new_data[:,0,:],'argo_tanom','tanom',lon,lat, grid)
     save_nc(newdf, new_data[:,1,:],'argo_temp','temp',lon,lat, grid)
 
