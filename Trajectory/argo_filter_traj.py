@@ -68,6 +68,8 @@ def check_update(old_file,new_date):
         print("New data found")
         return True
 
+def get_gr(orig_date):
+    return '{:%d%b%Y}'.format(orig_date)
 
 if __name__ == "__main__":
     prof_list = np.loadtxt('/home/grivera/GitLab/argo/Output/paita.txt', dtype=int)
@@ -75,8 +77,9 @@ if __name__ == "__main__":
                             parse_dates=[0]).sort_values('date').reset_index(drop=True)
     argo_filter = filter_date(prof_list,argo_db,365)
     argo_filter = group_dates(argo_filter,30)
+    argo_filter.loc[:,'GrADS'] = argo_filter['date'].apply(get_gr)
     filename = '/data/users/grivera/ARGO-prof/{}-traj{}.txt'
     if check_update(filename.format(prof_list,1),argo_filter.date.iloc[-1]):
-        for i in range(1,3):
+        for i in range(1,6):
             argo_filter.to_csv(filename.format(prof_list,i), header=None, index=None, sep=' ',
                             float_format='%.5f')
