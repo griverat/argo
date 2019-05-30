@@ -70,7 +70,7 @@ def main(update=False,outdir=os.getcwd(), ARGO_DIR='/data/datos/ARGO/data/'):
         updated_data = updated_data.persist()
         progress(updated_data)
         updated_data.to_csv(os.path.join(outdir,'latlontemp.txt'),
-                            index=False)
+                            index=False).compute()
     else:
         data = merge_data([get_data(argof) for argof in argo_files])
         data = data.persist()
