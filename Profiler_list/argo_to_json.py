@@ -34,4 +34,3 @@ if __name__ == "__main__":
     data = parse_db(ARGO_DB)
     with open('Output/argodb.json', 'w') as outfile:
         json.dump(data, outfile)
-    print(json.dumps(data, indent=4, sort_keys=True))
