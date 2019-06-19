@@ -10,8 +10,10 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 """
 
 from datetime import datetime
+from send_email import send_mail
 import pandas as pd
 import numpy as np
+import os
 
 
 def filter_date(prof,argo_db,days):
@@ -19,7 +21,7 @@ def filter_date(prof,argo_db,days):
     argo_db = argo_db.query('(platfn==@prof)')
     today = argo_db.date.iloc[-1]
     st_date = today-delta
-    filtered = argo_db.query('(date>@st_date)&(lat>-10)&(lat<0)&(lon>270)&(lon<290)').reset_index(drop=True)[['date','lat','lon']]
+    filtered = argo_db.query('(date>@st_date)&(lat>-20)&(lat<0)&(lon>270)&(lon<290)').reset_index(drop=True)[['date','lat','lon']]
     return filtered
 
 
@@ -71,8 +73,16 @@ def check_update(old_file,new_date):
 def get_gr(orig_date):
     return '{:%d%b%Y}'.format(orig_date)
 
+def launch_grads():
+    os.chdir("/home/grivera/GitLab/argo/Trajectory/plot_scripts")
+    os.system("grads -blc plot_map_r.gs")
+    os.chdir("/home/grivera/GitLab/argo/Trajectory")
+    os.system("sh convert_eps.sh")
+    send_mail()
+    
+
 if __name__ == "__main__":
-    prof_list = np.loadtxt('/home/grivera/GitLab/argo/Output/paita.txt', dtype=int)
+    prof_list = np.loadtxt('/home/grivera/GitLab/argo/Output/peru4.txt', dtype=int)
     argo_db = pd.read_csv('/data/users/grivera/ARGO-latlon/latlontemp.txt',
                             parse_dates=[0]).sort_values('date').reset_index(drop=True)
     argo_filter = filter_date(prof_list,argo_db,365)
@@ -83,3 +93,5 @@ if __name__ == "__main__":
         for i in range(1,6):
             argo_filter.to_csv(filename.format(prof_list,i), header=None, index=None, sep=' ',
                             float_format='%.5f')
+    # launch_grads()
+        
