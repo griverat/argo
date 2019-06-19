@@ -115,6 +115,7 @@ class ArgoHist(object):
         if not batch:
             plt.show()
         self.fig.savefig(os.path.join(output, 'hist+kde_argo.eps'),bbox_inches='tight',pad_inches=0)
+        self.fig.savefig(os.path.join(output, 'hist+kde_argo.png'),bbox_inches='tight',pad_inches=0)
 
 def load_data(filename):
     data = pd.read_csv(filename,parse_dates=[0])
