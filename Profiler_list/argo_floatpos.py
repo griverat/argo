@@ -24,14 +24,21 @@ def get_data(argo_file):
         argo_file = argo_file.load()
     lats = argo_file.LATITUDE.data
     lons = argo_file.LONGITUDE.data
+    depth = argo_file.PRES.data
+    new_depth = np.zeros((lats.shape))
+    for num, col in enumerate(depth):
+        try:
+            new_depth[num] = col[~np.isnan(col)][-1]
+        except:
+            new_depth[num] = -999999
     lons = np.where(lons<0, lons+360,lons)
     date = argo_file.JULD.data[0]
     date = np.repeat(pd.to_datetime(date).date(), len(lons))
     nprof = argo_file.N_PROF.data
     platfn = argo_file.PLATFORM_NUMBER.data.astype(int)
     df = {'date':date, 'lat':lats, 'lon':lons, 
-            'nprof':nprof,'platfn':platfn}
-    pairs = pd.DataFrame(df,columns=['date','lat','lon','nprof','platfn'])
+            'nprof':nprof,'platfn':platfn,'depth':new_depth}
+    pairs = pd.DataFrame(df,columns=['date','lat','lon','nprof','platfn','depth'])
     return pairs
 
 
