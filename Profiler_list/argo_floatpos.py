@@ -66,6 +66,24 @@ def update_data(argo_files, filename='latlontemp.txt',outdir=os.getcwd()):
     return new_data
 
 
+def check_bio(argo_db):
+    argo_db.loc[:,'bio']='N'
+    print('\nFetching bioARGO data')
+    os.system('wget ftp://ftp.ifremer.fr/ifremer/argo/argo_merge-profile_index.txt')
+    print('Parsing data')
+    bio_file = pd.read_csv('argo_merge-profile_index.txt',skiprows=8)
+    bio_file['file'] = bio_file['file'].apply(lambda x: int(x.split('/')[1]))
+    bio_file = bio_file.loc[:,['file','parameters']]
+    mask = bio_file['parameters'].str.contains("DOXY")
+    bio_file = bio_file[mask]['file'].unique()
+    print('Adding bio flags to output file')
+    for afloat in bio_file:
+        sel = argo_db.query('platfn==@afloat')
+        if not sel.empty:
+            argo_db.loc[sel.index,'bio']='Y'
+    return argo_db
+
+
 def main(update=False,outdir=os.getcwd(), ARGO_DIR='/data/datos/ARGO/data/'):
     argo_files = [os.path.join(ARGO_DIR,x) \
                     for x in os.listdir(ARGO_DIR) \
@@ -76,15 +94,18 @@ def main(update=False,outdir=os.getcwd(), ARGO_DIR='/data/datos/ARGO/data/'):
         updated_data = update_data(argo_files,outdir=outdir)
         updated_data = updated_data.persist()
         progress(updated_data)
+        updated_data = check_bio(updated_data)
         updated_data.to_csv(os.path.join(outdir,'latlontemp.txt'),
                             index=False).compute()
     else:
         data = merge_data([get_data(argof) for argof in argo_files])
         data = data.persist()
         progress(data)
+        data = data.compute()
+        data = check_bio(data.reset_index(drop=True))
         data.to_csv(os.path.join(outdir,'latlontemp.txt'),
-                    index=False).compute()
+                    index=False)
 
 
 if __name__ == '__main__':
-    main(update=True, outdir=os.path.join(os.getcwd(),'Output'))
+    main(update=False, outdir=os.path.join(os.getcwd(),'Output'))
