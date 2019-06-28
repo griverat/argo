@@ -37,8 +37,8 @@ def get_data(argo_file):
     nprof = argo_file.N_PROF.data
     platfn = argo_file.PLATFORM_NUMBER.data.astype(int)
     df = {'date':date, 'lat':lats, 'lon':lons, 
-            'nprof':nprof,'platfn':platfn,'depth':new_depth}
-    pairs = pd.DataFrame(df,columns=['date','lat','lon','nprof','platfn','depth'])
+            'nprof':nprof,'platfn':platfn,'depth':new_depth,'bio':'N'}
+    pairs = pd.DataFrame(df,columns=['date','lat','lon','nprof','platfn','depth','bio'])
     return pairs
 
 
@@ -67,9 +67,8 @@ def update_data(argo_files, filename='latlontemp.txt',outdir=os.getcwd()):
 
 
 def check_bio(argo_db):
-    argo_db.loc[:,'bio']='N'
     print('\nFetching bioARGO data')
-    os.system('wget ftp://ftp.ifremer.fr/ifremer/argo/argo_merge-profile_index.txt')
+    os.system('wget -N ftp://ftp.ifremer.fr/ifremer/argo/argo_merge-profile_index.txt')
     print('Parsing data')
     bio_file = pd.read_csv('argo_merge-profile_index.txt',skiprows=8)
     bio_file['file'] = bio_file['file'].apply(lambda x: int(x.split('/')[1]))
@@ -94,18 +93,17 @@ def main(update=False,outdir=os.getcwd(), ARGO_DIR='/data/datos/ARGO/data/'):
         updated_data = update_data(argo_files,outdir=outdir)
         updated_data = updated_data.persist()
         progress(updated_data)
-        updated_data = check_bio(updated_data)
+        updated_data = check_bio(updated_data.compute().reset_index(drop=True))
         updated_data.to_csv(os.path.join(outdir,'latlontemp.txt'),
-                            index=False).compute()
+                            index=False)
     else:
         data = merge_data([get_data(argof) for argof in argo_files])
         data = data.persist()
         progress(data)
-        data = data.compute()
-        data = check_bio(data.reset_index(drop=True))
+        data = check_bio(data.compute().reset_index(drop=True))
         data.to_csv(os.path.join(outdir,'latlontemp.txt'),
                     index=False)
 
 
 if __name__ == '__main__':
-    main(update=False, outdir=os.path.join(os.getcwd(),'Output'))
+    main(update=True, outdir=os.path.join(os.getcwd(),'Output'))
