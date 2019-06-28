@@ -12,22 +12,25 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 import pandas as pd
 import json
 
+
 def parse_db(argo_file):
-    argo_data = pd.read_csv(argo_file,parse_dates=[0])
+    argo_data = pd.read_csv(argo_file, parse_dates=[0])
     platfs = argo_data['platfn'].unique()
     container = {}
     for platf in platfs:
-        db_subset = argo_data.query("platfn==@platf").reset_index(drop=True).sort_values(by=['date'])
+        db_subset = argo_data.query("platfn==@platf").reset_index(
+            drop=True).sort_values(by=['date'])
         for r in db_subset.itertuples():
             try:
-                container[f"{platf}"].update({"{:02d}".format((r.Index)):{'date':"{:%Y-%m-%d}".format(r.date),
-                                    'lat':r.lat,'lon':r.lon,'nprof':r.nprof}})
+                container[f"{platf}"].update({"{:02d}".format((r.Index)): {'date': "{:%Y-%m-%d}".format(
+                    r.date), 'lat': r.lat, 'lon': r.lon, 'nprof': r.nprof, 'depth': r.depth, 'bio': r.bio}})
             except:
-                container[f"{platf}"]={"{:02d}".format(r.Index):{'date':"{:%Y-%m-%d}".format(r.date),
-                                    'lat':r.lat,'lon':r.lon,'nprof':r.nprof}}
+                container[f"{platf}"] = {"{:02d}".format(r.Index): {'date': "{:%Y-%m-%d}".format(
+                    r.date), 'lat': r.lat, 'lon': r.lon, 'nprof': r.nprof, 'depth': r.depth, 'bio': r.bio}}
     container = json.dumps(container)
     container = json.loads(container)
     return container
+
 
 if __name__ == "__main__":
     ARGO_DB = "Output/latlontemp.txt"
