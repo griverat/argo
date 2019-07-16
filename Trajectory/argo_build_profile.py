@@ -91,7 +91,7 @@ def build_profile(argo_number, argo_db, argo_dir, outdir, clim):
                     lat, lon = data.LATITUDE[idx].data, data.LONGITUDE[idx].data
                     date = data.JULD[idx].data
                     day = clim.sel(time=pd.to_datetime(date).date(
-                    ), lat=lat, lon=lon+360, method='nearest')  # .mean(dim=['lat','lon'])
+                    ), lat=lat, lon=lon+360, method='nearest')
                     day = day.interp(level=grid).data
                     container.append(
                         nc_save(argo_number, lat, lon, date, temp, temp-day, salt, outdir, grid))
@@ -101,7 +101,7 @@ def build_profile(argo_number, argo_db, argo_dir, outdir, clim):
                 lat, lon = data.LATITUDE[ix].data, data.LONGITUDE[ix].data
                 date = data.JULD[ix].data
                 day = clim.sel(time=pd.to_datetime(date).date(
-                ), lat=lat, lon=lon+360, method='nearest')  # .mean(dim=['lat','lon'])
+                ), lat=lat, lon=lon+360, method='nearest')
                 day = day.interp(level=grid).bfill(dim='level').data
                 container.append(nc_save(argo_number, lat, lon,
                                          date, temp, temp-day, salt, outdir, grid))
@@ -129,12 +129,14 @@ def main(prof_file, DB_DIR, ARGO_DIR, OUTPUT_DIR, clims):
     for profiler in prof_list:
         wrap_profile(profiler, clims, argo_db, ARGO_DIR, OUTPUT_DIR)
 
+
 def getArgs(argv=None):
     parser = argparse.ArgumentParser(
         description="Get the vertical temperature and salinity profiles of an ARGO float")
     parser.add_argument("proflist", type=str,
                         help="File containing ARGO floats id. One per row")
     return parser.parse_args(argv)
+
 
 if __name__ == '__main__':
     ARGO_DIR = '/data/datos/ARGO/data/'
