@@ -14,6 +14,7 @@ from dask.diagnostics import ProgressBar
 import xarray as xr
 import pandas as pd
 import numpy as np
+import argparse
 import gsw
 import os
 
@@ -110,7 +111,7 @@ def build_profile(argo_number, argo_db, argo_dir, outdir, clim):
 
 
 def wrap_profile(profiler, clims, argo_db, *args):
-    print(f'## STARING COMPUTATION OF ARGO PROFILER N°{profiler}\n')
+    print(f'\n\n## STARING COMPUTATION OF ARGO PROFILER N°{profiler}\n')
     for source, clim_data in clims.items():
         print(f'\nBuilding profile with {source} climatology')
         out_profile = build_profile(
@@ -128,12 +129,20 @@ def main(prof_file, DB_DIR, ARGO_DIR, OUTPUT_DIR, clims):
     for profiler in prof_list:
         wrap_profile(profiler, clims, argo_db, ARGO_DIR, OUTPUT_DIR)
 
+def getArgs(argv=None):
+    parser = argparse.ArgumentParser(
+        description="Get the vertical temperature and salinity profiles of an ARGO float")
+    parser.add_argument("proflist", type=str,
+                        help="File containing ARGO floats id. One per row")
+    return parser.parse_args(argv)
 
 if __name__ == '__main__':
     ARGO_DIR = '/data/datos/ARGO/data/'
     DB_DIR = '/data/users/grivera/ARGO-latlon/'
     OUTPUT_DIR = '/data/users/grivera/ARGO-prof'
-    PROF_FILE = '/home/grivera/GitLab/argo/Output/paita.txt'
+
+    args = getArgs()
+    PROF_FILE = args.proflist
 
     print('Opening GODAS clim')
     godas_clim = xr.open_mfdataset(
