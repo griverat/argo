@@ -230,18 +230,37 @@ endwhile
 'set dfile 4'
 'subplot 1 2 2 'opt
 'set mpdset hires'
-'set mpt 0 15 1 6'
-'set mpt 1 15 1 6'
-'set mpt 2  1 3 3'
 'set t last'
 'set lat -8 -1'
 'set lev 0'
 'set lon 275 282'
-'set map 1 1 4'
+'set map 0 1 0'
 'set clevs 0'
 'set ylint 1'
 'set xlint 1'
 'set ccols 0 0'
+'d pottmp.4'
+
+'set rgb 40 190 190 190 -70'
+'set shpopts 40'
+'set line 40 1 0'
+'draw shp /data/users/grivera/Shapes/costa_200mn_mask.shp'
+
+'set rgb 41 180 180 180 -70'
+'set shpopts 41'
+'set line 41 1 0'
+'draw shp /data/users/grivera/Shapes/costa_100mn_mask.shp'
+
+'set rgb 42 170 170 170 -70'
+'set shpopts 42'
+'set line 42 1 0'
+'draw shp /data/users/grivera/Shapes/costa_50mn_mask.shp'
+
+'set shpopts 0'
+'set line 1 1 4'
+'draw shp /data/users/grivera/Shapes/southamerica/po_Sudamerica_GEO_v20.shp'
+
+'set clevs 0'
 'd pottmp.4'
 
 status=0
@@ -334,6 +353,7 @@ xi=subwrd(result,3); yi=subwrd(result,6)
 'gxprint 'outdir''name''iso'_'datef'.eps'
 'gxprint 'outdir''name''iso'_latest.eps'
 
+*'quit'
 
 
 
