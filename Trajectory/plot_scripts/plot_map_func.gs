@@ -335,7 +335,7 @@ function main(args)
 
     'set strsiz 0.093 0.1'
     'set string 1 l 3'
-    'draw string 5.8 1 Source: ARGO GDAC   Processing: IGP   Latest data: 'daten
+    'draw string 5.8 1 Source: ARGO GDAC   Processing: IGP   Latest data: 'datef
     'draw string 5.8 0.75 Clim: 1981-2010 - a)GODAS, b)SODA, c)IMARPE'
     'draw string 5.8 0.5 11-day running mean x2'
 
