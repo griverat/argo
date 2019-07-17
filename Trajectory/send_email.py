@@ -12,7 +12,7 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 import pandas as pd
 import os, datetime
 
-def send_mail(filename="prof3901231_clim_trajr16_latest.png"):
+def send_mail(profnum):
     from email.mime.multipart import MIMEMultipart 
     from email.mime.text import MIMEText 
     from email.mime.base import MIMEBase 
@@ -21,16 +21,17 @@ def send_mail(filename="prof3901231_clim_trajr16_latest.png"):
 
     fromaddr = "grivera@igp.gob.pe"
     gmail_password = os.getenv('USER_PASS')
+    filename = f"prof{profnum}_clim_trajr16_latest.png"
 
-    toaddr = ["grivera@igp.gob.pe","gerardo_art@hotmail.com","gerardo_art@me.com"]
+    toaddr = ["gerardo_art@hotmail.com","andres.32mflores@gmail.com"]
 
     print(f"Sending email to the following recipients: {toaddr}")
 
     msg = MIMEMultipart() 
     msg['From'] = fromaddr 
     msg['To'] = ','.join(toaddr)
-    msg['Subject'] = "[AUTO] ARGO Profiler 3901231 update"
-    body = "The ARGO profiler #3901231 trajectory has been updated with a new \
+    msg['Subject'] = f"[AUTO] ARGO Profiler {profnum} update"
+    body = f"The ARGO profiler #{profnum} trajectory has been updated with a new \
 entry.\n Attached you can find the latest profile data.\n\n"
     msg.attach(MIMEText(body, 'plain')) 
     
@@ -53,5 +54,5 @@ entry.\n Attached you can find the latest profile data.\n\n"
     s.close()
 
 if __name__ == "__main__":
-    latest_plot = "prof3901231_clim_trajr16_latest.png"
+    latest_plot = "3901231"
     send_mail(latest_plot)
