@@ -82,8 +82,7 @@ def launch_grads(profcode, lat1, lat2, lon1, lon2):
     os.system(
         f'grads -d X11 -blc "run plot_map_func.gs {profcode} {lat1} {lat2} {lon1} {lon2}"')
     os.chdir("/home/grivera/GitLab/argo/Trajectory")
-    os.system("sh convert_eps.sh")
-    # send_mail()
+    os.system(f"sh convert_eps.sh *{profcode}*.eps")
 
 
 def filter_traj(prof_num, argo_db):
@@ -95,13 +94,17 @@ def filter_traj(prof_num, argo_db):
         for i in range(1, 6):
             argo_filter.to_csv(filename.format(prof_num, i), header=None, index=None, sep=' ',
                                float_format='%.5f')
-
+        return True
+    else:
+        return False
 
 def main(prof_num, lats, lons):
     argo_db = pd.read_csv('/data/users/grivera/ARGO-latlon/latlontemp.txt',
                           parse_dates=[0]).sort_values('date').reset_index(drop=True)
-    filter_traj(prof_num, argo_db)
-    launch_grads(prof_num, lats[0], lats[1], lons[0], lons[1])
+    update = filter_traj(prof_num, argo_db)
+    if update:
+        launch_grads(prof_num, lats[0], lats[1], lons[0], lons[1])
+        send_mail(prof_num)
 
 
 def getArgs(argv=None):
