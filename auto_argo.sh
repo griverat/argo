@@ -24,15 +24,13 @@ python argo_to_json.py
 
 cp Output/* $OUTDIR/ARGO-latlon/
 
-
 ##############################
 #    Build Trajectory plot   #
 ##############################
 
 cd "$SCR_DIR/Trajectory" || exit
 
-python argo_build_profile.py
-python argo_filter_traj.py
+sh argo_run_traj.sh
 
 ##############################
 #   Build multiple profiles  #
@@ -40,5 +38,4 @@ python argo_filter_traj.py
 
 cd "$SCR_DIR/Region_data" || exit
 
-sh argo_region_nc.sh
-
+# sh argo_region_nc.sh
