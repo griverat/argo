@@ -300,6 +300,9 @@ function main(args)
         class = subwrd(marks,5)
         if (n=0)
             pclass=class
+            if (pclass=11)
+                ncol=2
+            endif
         endif
         if (class!=pclass)
             ncol = ncol +1
