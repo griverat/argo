@@ -283,6 +283,24 @@ function main(args)
     'set clevs 0'
     'd pottmp.4'
 
+    'set line 40 1 0'
+    'draw mark 5 6.05 2.3 0.2'
+    'draw mark 5 6.05 2.05 0.2'
+    'draw mark 5 6.05 1.8 0.2'
+
+    'set line 41 1 0'
+    'draw mark 5 6.05 2.05 0.2'
+    'draw mark 5 6.05 1.8 0.2'
+
+    'set line 42 1 0'
+    'draw mark 5 6.05 1.8 0.2'
+
+    'set strsiz 0.1 0.15'
+    'set string 1 l 5'
+    'draw string 6.2 2.3 200nm'
+    'draw string 6.2 2.05 100nm'
+    'draw string 6.2 1.8 50nm'
+
     status=0
     plat=0
     plon=0
