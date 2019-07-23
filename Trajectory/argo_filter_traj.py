@@ -22,8 +22,8 @@ def filter_date(prof, argo_db, days):
     argo_db = argo_db.query('(platfn==@prof)')
     today = argo_db.date.iloc[-1]
     st_date = today-delta
-    filtered = argo_db.query(
-        '(date>@st_date)&(lat>-20)&(lat<0)&(lon>270)&(lon<290)').reset_index(drop=True)[['date', 'lat', 'lon']]
+    filtered = argo_db.query('date>=@st_date').reset_index(
+        drop=True)[['date', 'lat', 'lon']]
     return filtered
 
 
@@ -98,6 +98,7 @@ def filter_traj(prof_num, argo_db):
     else:
         return False
 
+
 def main(prof_num, lats, lons):
     argo_db = pd.read_csv('/data/users/grivera/ARGO-latlon/latlontemp.txt',
                           parse_dates=[0]).sort_values('date').reset_index(drop=True)
@@ -110,11 +111,11 @@ def main(prof_num, lats, lons):
 def getArgs(argv=None):
     parser = argparse.ArgumentParser(
         description="Plot the last year of data and position of an ARGO float")
-    parser.add_argument("profnum", type=str,
+    parser.add_argument("profnum", type=int,
                         help="ARGO float id")
-    parser.add_argument("--lat", type=int, nargs=2,
+    parser.add_argument("--lat", type=float, nargs=2,
                         help="Lat boundaries of the displayed map")
-    parser.add_argument("--lon", type=int, nargs=2,
+    parser.add_argument("--lon", type=float, nargs=2,
                         help="Lon boundaries of the displayed map")
     return parser.parse_args(argv)
 
