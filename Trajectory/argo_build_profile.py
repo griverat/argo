@@ -99,10 +99,14 @@ def build_profile(argo_number, argo_db, argo_dir, outdir, clim):
                 ix = ix[0]
                 temp, salt = grid_data(data, ix, dfile)
                 lat, lon = data.LATITUDE[ix].data, data.LONGITUDE[ix].data
+                if lon < 0:
+                    lon += 360
                 date = data.JULD[ix].data
-                day = clim.sel(time=pd.to_datetime(date).date(
-                ), lat=lat, lon=lon+360, method='nearest')
+                day = clim.sel(time=pd.to_datetime(date).date()).ffill(
+                    dim='lat').sel(lat=lat, lon=lon, method='nearest')
                 day = day.interp(level=grid).bfill(dim='level').data
+                if (lat < clim.lat.data.min()) or (lon < clim.lon.data.min()):
+                    day[:] = np.nan
                 container.append(nc_save(argo_number, lat, lon,
                                          date, temp, temp-day, salt, outdir, grid))
         else:
