@@ -31,9 +31,7 @@ def grid_data(data_file, ix, dfile, grid=np.arange(0, 2001, 1)):
         return np.full_like(grid, np.nan, dtype=np.double), np.full_like(grid, np.nan, dtype=np.double)
     else:
         try:
-            # , kind='linear',fill_value=np.nan,bounds_error=False)
             func_t = PchipInterpolator(-depths[mask], temp[mask])
-            # , kind='linear',fill_value=np.nan,bounds_error=False)
             func_s = PchipInterpolator(-depths[mask], salt[mask])
         except:
             print('Error on file {}'.format(dfile))
@@ -73,7 +71,7 @@ def crop_list(argo_number, argo_db, argo_dir):
 
 
 def build_profile(argo_number, argo_db, argo_dir, outdir, clim):
-    grid = np.arange(0, 2001, 1)
+    grid = np.arange(0, 2501, 1)
     files, fday = crop_list(argo_number, argo_db, argo_dir)
     with ProgressBar():
         print('Loading daily climatology')
@@ -87,7 +85,7 @@ def build_profile(argo_number, argo_db, argo_dir, outdir, clim):
                 np.int) == argo_number)[0]
             if ix.size > 1:
                 for idx in ix:
-                    temp, salt = grid_data(data, idx, dfile)
+                    temp, salt = grid_data(data, idx, dfile, grid)
                     lat, lon = data.LATITUDE[idx].data, data.LONGITUDE[idx].data
                     date = data.JULD[idx].data
                     day = clim.sel(time=pd.to_datetime(date).date(
@@ -97,7 +95,7 @@ def build_profile(argo_number, argo_db, argo_dir, outdir, clim):
                         nc_save(argo_number, lat, lon, date, temp, temp-day, salt, outdir, grid))
             else:
                 ix = ix[0]
-                temp, salt = grid_data(data, ix, dfile)
+                temp, salt = grid_data(data, ix, dfile, grid)
                 lat, lon = data.LATITUDE[ix].data, data.LONGITUDE[ix].data
                 if lon < 0:
                     lon += 360
