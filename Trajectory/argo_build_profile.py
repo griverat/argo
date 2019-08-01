@@ -118,8 +118,10 @@ def wrap_profile(profiler, clims, argo_db, *args):
         print(f'\nBuilding profile with {source} climatology')
         out_profile = build_profile(
             profiler, argo_db, ARGO_DIR, OUTPUT_DIR, clim_data)
-        out_profile.resample({'time': '1D'}).mean(dim='time').to_netcdf(
-            os.path.join(OUTPUT_DIR, f'{profiler}_{source}.nc'))
+        out_profile = out_profile.resample({'time': '1D'}).mean(dim='time')
+        out_profile.attrs['platfn'] = profiler
+        out_profile.to_netcdf(os.path.join(
+            OUTPUT_DIR, f'{profiler}_{source}.nc'))
 
 
 def main(prof_file, DB_DIR, ARGO_DIR, OUTPUT_DIR, clims):
