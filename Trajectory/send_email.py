@@ -23,7 +23,7 @@ def send_mail(profnum):
     gmail_password = os.getenv('USER_PASS')
     filename = f"prof{profnum}_clim_trajr16_latest.png"
 
-    toaddr = ["gerardo_art@hotmail.com","andres.32mflores@gmail.com"]
+    toaddr = ["gerardo_art@hotmail.com","20100145@lamolina.edu.pe"]
 
     print(f"Sending email to the following recipients: {toaddr}")
 
