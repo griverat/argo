@@ -19,27 +19,46 @@ import gsw
 import os
 
 
+def test_qc(qc):
+    siz = qc.size
+    mask = qc == 4
+    if mask.sum() > siz/2:
+        return np.full_like(qc, True, dtype=np.bool)
+    else:
+        return qc
+
+
 def grid_data(data_file, ix, dfile, grid=np.arange(0, 2001, 1)):
+    temp_qc = test_qc(data_file.TEMP_QC[ix].astype(np.float))
+    psal_qc = test_qc(data_file.PSAL_QC[ix].astype(np.float))
+    pres_qc = test_qc(data_file.PRES_QC[ix].astype(np.float))
     depths = gsw.conversions.z_from_p(
-        data_file.PRES[ix].data, data_file.LATITUDE[ix].data)
-    temp = data_file.TEMP[ix].data
-    salt = data_file.PSAL[ix].data
+        data_file.PRES[ix].where(pres_qc != 4).data, data_file.LATITUDE[ix].data)
+    temp = data_file.TEMP[ix].where(
+        temp_qc != 4).interpolate_na(dim='N_LEVELS').data
+    salt = data_file.PSAL[ix].where(
+        psal_qc != 4).interpolate_na(dim='N_LEVELS').data
     mask = ~np.isnan(temp)
     mask[np.where(depths) == 0] = False
     mask[np.isnan(depths)] = False
+    new_grid = np.where(grid > -depths[mask][-1], np.nan, grid)
+    new_grid[np.where(grid < -depths[mask][0])] = np.nan
     if temp[mask].size == 1:
         return np.full_like(grid, np.nan, dtype=np.double), np.full_like(grid, np.nan, dtype=np.double)
     else:
         try:
             func_t = PchipInterpolator(-depths[mask], temp[mask])
-            func_s = PchipInterpolator(-depths[mask], salt[mask])
+            new_temp = func_t(new_grid)
         except:
-            print('Error on file {}'.format(dfile))
-            return np.full_like(grid, np.nan, dtype=np.double), np.full_like(grid, np.nan, dtype=np.double)
-    new_grid = np.where(grid > -depths[mask][-1], np.nan, grid)
-    new_grid[np.where(grid < -depths[mask][0])] = np.nan
-    new_temp = func_t(new_grid)
-    new_salt = func_s(new_grid)
+            print('TEMP: Error on file {}'.format(dfile))
+            new_temp = np.full_like(grid, np.nan, dtype=np.double)
+        try:
+            func_s = PchipInterpolator(-depths[mask], salt[mask])
+            new_salt = func_s(new_grid)
+        except:
+            print('PSAL: Error on file {}'.format(dfile))
+            new_salt = np.full_like(grid, np.nan, dtype=np.double)
+
     return new_temp, new_salt
 
 
