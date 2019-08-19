@@ -15,6 +15,7 @@ import dask.dataframe as dd
 import xarray as xr
 import pandas as pd
 import numpy as np
+import argparse
 import os
 
 
@@ -62,7 +63,7 @@ def setup_cluster():
     return client
 
 
-def update_data(argo_files, filename="latlontemp.txt", outdir=os.getcwd()):
+def update_data(argo_files, filename="argo_latlon.txt", outdir=os.getcwd()):
     to_update = pd.read_csv(os.path.join(outdir, filename), parse_dates=[0])
     last_date = to_update.iloc[-1]["date"] - pd.DateOffset(60, "D")
     to_update = to_update.drop(to_update[to_update["date"] >= last_date].index)
@@ -104,14 +105,26 @@ def main(update=False, outdir=os.getcwd(), ARGO_DIR="/data/datos/ARGO/data/"):
         updated_data = updated_data.persist()
         progress(updated_data)
         updated_data = check_bio(updated_data.compute().reset_index(drop=True))
-        updated_data.to_csv(os.path.join(outdir, "latlontemp.txt"), index=False)
+        updated_data.to_csv(os.path.join(outdir, "argo_latlon.txt"), index=False)
     else:
         data = merge_data([get_data(argof) for argof in argo_files])
         data = data.persist()
         progress(data)
         data = check_bio(data.compute().reset_index(drop=True))
-        data.to_csv(os.path.join(outdir, "latlontemp.txt"), index=False)
+        data.to_csv(os.path.join(outdir, "argo_latlon.txt"), index=False)
+
+
+def getArgs(argv=None):
+    OUTPUT_DIR = "Output"
+    parser = argparse.ArgumentParser(
+        description="Create a database containing ARGO lat/lon"
+    )
+    parser.add_argument(
+        "output", type=str, help="Output destination", default=OUTPUT_DIR, nargs="?"
+    )
+    return parser.parse_args(argv)
 
 
 if __name__ == "__main__":
-    main(update=True, outdir=os.path.join(os.getcwd(), "Output"))
+    args = getArgs()
+    main(update=True, outdir=os.path.join(os.getcwd(), args.output))
