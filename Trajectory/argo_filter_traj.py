@@ -13,7 +13,11 @@ from datetime import datetime
 from send_email import send_mail
 import pandas as pd
 import argparse
+import json
 import os
+
+with open("./../paths.json") as f:
+    paths = json.load(f)
 
 
 def filter_date(prof, argo_db, days):
@@ -79,10 +83,10 @@ def get_gr(orig_date):
 
 
 def launch_grads(profcode, lats, lons):
-    os.chdir("/home/grivera/GitLab/argo/Trajectory/plot_scripts")
+    os.chdir(paths["TRAJ_PLOT_DIR"])
     coords = "{} {} {} {}".format(*lats, *lons)
     os.system(f'grads -d X11 -blc "run plot_map_func.gs {profcode} {coords}"')
-    os.chdir("/home/grivera/GitLab/argo/Trajectory")
+    os.chdir(paths["TARJ_DIR"])
     os.system(f"sh convert_eps.sh *{profcode}*.eps")
 
 
@@ -90,7 +94,7 @@ def filter_traj(prof_num, argo_db):
     argo_filter = filter_date(prof_num, argo_db, 365)
     argo_filter = group_dates(argo_filter, 30)
     argo_filter.loc[:, "GrADS"] = argo_filter["date"].apply(get_gr)
-    filename = "/data/users/grivera/ARGO-prof/{}-traj{}.txt"
+    filename = os.path.join(paths["ARGO_PROF_OUT"], "{}-traj{}.txt")
     if check_update(filename.format(prof_num, 1), argo_filter.date.iloc[-1]):
         for i in range(1, 6):
             argo_filter.to_csv(
@@ -106,8 +110,7 @@ def filter_traj(prof_num, argo_db):
 
 
 def main(prof_num, lats, lons):
-    DB_PATH = "/data/users/grivera/ARGO-latlon/latlontemp.txt"
-    argo_db = pd.read_csv(DB_PATH, parse_dates=[0])
+    argo_db = pd.read_csv(paths["ARGO_DB"], parse_dates=[0])
     argo_db = argo_db.sort_values("date").reset_index(drop=True)
 
     update = filter_traj(prof_num, argo_db)

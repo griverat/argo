@@ -15,7 +15,7 @@ import dask.dataframe as dd
 import xarray as xr
 import pandas as pd
 import numpy as np
-import argparse
+import json
 import os
 
 
@@ -114,17 +114,7 @@ def main(update=False, outdir=os.getcwd(), ARGO_DIR="/data/datos/ARGO/data/"):
         data.to_csv(os.path.join(outdir, "argo_latlon.txt"), index=False)
 
 
-def getArgs(argv=None):
-    OUTPUT_DIR = "Output"
-    parser = argparse.ArgumentParser(
-        description="Create a database containing ARGO lat/lon"
-    )
-    parser.add_argument(
-        "output", type=str, help="Output destination", default=OUTPUT_DIR, nargs="?"
-    )
-    return parser.parse_args(argv)
-
-
 if __name__ == "__main__":
-    args = getArgs()
-    main(update=True, outdir=os.path.join(os.getcwd(), args.output))
+    with open("./../paths.json") as f:
+        paths = json.load(f)
+    main(update=True, outdir=os.path.join(os.getcwd(), paths["ARGO_DB_OUT"]))

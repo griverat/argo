@@ -17,8 +17,12 @@ import numpy as np
 import pandas as pd
 import dask.array as da
 import os
+import json
 import sys
 import gsw
+
+with open("./../paths.json") as f:
+    paths = json.load(f)
 
 
 def filter_data(data, lat, lon, time):
@@ -61,14 +65,7 @@ def update_nc():
 
 
 def save_nc(
-    argodb,
-    argo_data,
-    filename,
-    varname,
-    lon,
-    lat,
-    grid,
-    outdir="/data/users/grivera/ARGO-patch",
+    argodb, argo_data, filename, varname, lon, lat, grid, outdir=paths["ARGO_PATCH_OUT"]
 ):
     argo_data = argo_data.compute()
     argo_count = argodb.groupby("date").size().resample("1D").asfreq().values
@@ -122,16 +119,14 @@ def setup_cluster():
 def main(lat, lon, time):
     client = setup_cluster()
     print(client)
-    ARGO_DIR = "/data/datos/ARGO/data/"
-    DB_PATH = "/home/grivera/GitLab/argo/Profiler_list/Output/latlontemp.txt"
     GODAS_GLOB = "/data/users/grivera/GODAS/clim/daily/*.godas_dayclim.nc"
     dfmt = "{:%Y-%m-%d}"
 
-    argodb = pd.read_csv(DB_PATH, parse_dates=[0])
+    argodb = pd.read_csv(paths["ARGO_DB"], parse_dates=[0])
     grid = np.arange(0, 2001, 2.0)
     newdf = filter_data(argodb, lat, lon, time)
     newdf.loc[:, "fname"] = newdf["date"].apply(
-        get_fn, args=(ARGO_DIR, "{:%Y%m%d}_prof.nc")
+        get_fn, args=(paths["ARGO_DATA"], "{:%Y%m%d}_prof.nc")
     )
     newdf = newdf.sort_values("date")
     print(

@@ -9,6 +9,7 @@ Email: gerardo_art@me.com
 
 import pandas as pd
 import numpy as np
+import json
 import argparse
 import datetime
 
@@ -20,6 +21,8 @@ import matplotlib.patches as mpatches
 import matplotlib.cm as cmx
 import cartopy.feature as cfeature
 
+with open("./../paths.json") as f:
+    paths = json.load(f)
 
 plt.style.use("seaborn-paper")
 
@@ -144,7 +147,7 @@ def getArgs(argv=None):
 
 
 if __name__ == "__main__":
-    ARGODB = "/data/users/grivera/ARGO-latlon/latlontemp.txt"
+    ARGODB = paths["ARGO_DB"]
     argo_db = (
         pd.read_csv(ARGODB, parse_dates=[0]).sort_values("date").reset_index(drop=True)
     )

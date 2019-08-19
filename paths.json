@@ -1,0 +1,8 @@
+{
+    "ARGO_DB_OUT": "/data/users/grivera/ARGO-latlon",
+    "ARGO_DB": "/data/users/grivera/argo_latlon.txt",
+    "ARGO_DATA": "/data/datos/ARGO/data",
+    "ARGO_PROF_OUT": "/data/users/grivera/ARGO-prof",
+    "TRAJ_DIR": "/home/grivera/GitLab/argo/Trajectory",
+    "TRAJ_PLOT_DIR": "/home/grivera/GitLab/argo/Trajectory/plot_scripts"
+}

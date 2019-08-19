@@ -10,6 +10,7 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 """
 
 import pandas as pd
+import os
 import json
 
 
@@ -59,8 +60,9 @@ def to_nedb_obj(argo_file):
 
 
 if __name__ == "__main__":
-    ARGO_DB = "Output/latlontemp.txt"
-    data = to_nedb_obj(ARGO_DB)
-    with open("Output/argodb.json", "w") as outfile:
+    with open("./../paths.json") as f:
+        paths = json.load(f)
+    data = to_nedb_obj(paths["ARGO_DB"])
+    with open(os.path.join(paths["ARGO_DB_OUT"], "argodb.json"), "w") as outfile:
         outfile.write(data)
         # json.dump(data, outfile)

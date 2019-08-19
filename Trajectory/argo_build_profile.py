@@ -16,7 +16,11 @@ import pandas as pd
 import numpy as np
 import argparse
 import gsw
+import json
 import os
+
+with open("./../paths.json") as f:
+    paths = json.load(f)
 
 
 def test_qc(qc):
@@ -172,7 +176,7 @@ def build_profile(argo_number, argo_db, argo_dir, outdir, clim):
     return xr.merge(container)
 
 
-def wrap_profile(profiler, clims, argo_db, *args):
+def wrap_profile(profiler, clims, argo_db, ARGO_DIR, OUTPUT_DIR):
     print(f"\n\n## STARING COMPUTATION OF ARGO PROFILER N°{profiler}\n")
     for source, clim_data in clims.items():
         print(f"\nBuilding profile with {source} climatology")
@@ -185,7 +189,7 @@ def wrap_profile(profiler, clims, argo_db, *args):
 def main(prof_file, DB_DIR, ARGO_DIR, OUTPUT_DIR, clims):
     prof_list = np.loadtxt(prof_file, dtype=int)
     argo_db = (
-        pd.read_csv(os.path.join(DB_DIR, "latlontemp.txt"), parse_dates=[0])
+        pd.read_csv(os.path.join(DB_DIR, "argo_latlon.txt"), parse_dates=[0])
         .sort_values("date")
         .reset_index(drop=True)
     )
@@ -196,22 +200,16 @@ def main(prof_file, DB_DIR, ARGO_DIR, OUTPUT_DIR, clims):
 
 
 def getArgs(argv=None):
-    OUTPUT_DIR = "/data/users/grivera/ARGO-prof"
     parser = argparse.ArgumentParser(
         description="Get the vertical temperature and salinity profiles of an ARGO float"
     )
     parser.add_argument(
         "proflist", type=str, help="File containing ARGO floats id. One per row"
     )
-    parser.add_argument(
-        "output", type=str, help="Output destination", default=OUTPUT_DIR, nargs="?"
-    )
     return parser.parse_args(argv)
 
 
 if __name__ == "__main__":
-    ARGO_DIR = "/data/datos/ARGO/data/"
-    DB_DIR = "./../ARGO-latlon/"
 
     args = getArgs()
     PROF_FILE = args.proflist
@@ -235,4 +233,10 @@ if __name__ == "__main__":
     print("Climatologies loaded")
 
     print("\n\n### Starting computation ###\n")
-    main(PROF_FILE, DB_DIR, ARGO_DIR, args.ouput, clims)
+    main(
+        PROF_FILE,
+        paths["ARGO_DB_OUT"],
+        paths["ARGO_DATA"],
+        paths["ARGO_PROF_OUT"],
+        clims,
+    )
