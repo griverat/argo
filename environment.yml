@@ -1,0 +1,11 @@
+name: Work
+channels:
+  - conda-forge
+dependencies:
+  - python=3.7
+  - xarray
+  - scipy
+  - bottleneck
+  - dask
+  - distributed
+  - gsw
