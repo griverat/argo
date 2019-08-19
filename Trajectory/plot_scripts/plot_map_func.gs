@@ -297,9 +297,9 @@ function main(args)
 
     'set strsiz 0.1 0.15'
     'set string 1 l 5'
-    'draw string 6.2 2.3 200nm'
-    'draw string 6.2 2.05 100nm'
-    'draw string 6.2 1.8 50nm'
+    'draw string 6.2 2.3 100-200nm'
+    'draw string 6.2 2.05 50-100nm'
+    'draw string 6.2 1.8 0-50nm'
 
     status=0
     plat=0
