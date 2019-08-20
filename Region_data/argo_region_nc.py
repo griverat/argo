@@ -9,7 +9,8 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 -----
 """
 
-from dask.distributed import Client, LocalCluster, progress
+from dask.distributed import Client, LocalCluster
+from distributed.diagnostics.progressbar import progress
 from scipy.interpolate import PchipInterpolator
 from dask import delayed
 import xarray as xr
