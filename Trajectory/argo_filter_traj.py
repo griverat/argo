@@ -19,6 +19,7 @@ import os
 
 with open("./../paths.json") as f:
     paths = json.load(f)
+out_plot = paths["TRAJ_PLOT_OUT"]
 
 
 def filter_date(prof, argo_db, days):
@@ -88,7 +89,8 @@ def launch_grads(profcode, lats, lons):
     args = "{} {} {} {} {}".format(*lats, *lons, paths["ARGO_PROF_OUT"])
     os.system(f'grads -d X11 -blc "run plot_map_func.gs {profcode} {args}"')
     os.chdir(paths["TARJ_DIR"])
-    os.system(f"sh convert_eps.sh *{profcode}*.eps")
+
+    os.system(f"sh convert_eps.sh {out_plot}/*{profcode}*.eps")
 
 
 def filter_traj(prof_num, argo_db):
@@ -116,7 +118,7 @@ def main(prof_num, lats, lons):
 
     update = filter_traj(prof_num, argo_db)
     if update:
-        check_folder(paths["TRAJ_PLOT_OUT"], prof_num)
+        check_folder(out_plot, prof_num)
         launch_grads(prof_num, lats, lons)
         send_mail(prof_num)
 
