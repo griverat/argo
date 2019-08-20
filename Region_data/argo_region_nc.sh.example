@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash
 #SBATCH --partition mpi_short2
 #SBATCH --nodes 1
 #SBATCH --ntasks-per-node 4

@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash
 #Created on Tue Jul 16 03:46:32 2019
 #Author: Gerardo A. Rivera Tello
 #Email: grivera@igp.gob.pe
@@ -6,7 +6,6 @@
 #Copyright (c) 2019 Instituto Geofisico del Peru
 #-----
 
-source /home/grivera/miniconda3/etc/profile.d/conda.sh
 conda activate Work
 
 python argo_build_profile.py ../Output/peru.txt
