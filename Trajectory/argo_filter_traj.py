@@ -84,8 +84,8 @@ def get_gr(orig_date):
 
 def launch_grads(profcode, lats, lons):
     os.chdir(paths["TRAJ_PLOT_DIR"])
-    coords = "{} {} {} {}".format(*lats, *lons)
-    os.system(f'grads -d X11 -blc "run plot_map_func.gs {profcode} {coords}"')
+    args = "{} {} {} {} {}".format(*lats, *lons, paths["ARGO_PROF_OUT"])
+    os.system(f'grads -d X11 -blc "run plot_map_func.gs {profcode} {args}"')
     os.chdir(paths["TARJ_DIR"])
     os.system(f"sh convert_eps.sh *{profcode}*.eps")
 

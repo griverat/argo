@@ -2,7 +2,7 @@ function main(args)
     'reinit'
     say args
     if ( args='?' )
-        say 'This script needs 5 arguments: profcode lat1 lat2 lon1 lon2'
+        say 'This script needs 6 arguments: profcode lat1 lat2 lon1 lon2 profout'
         return
     else
         profcode=subwrd(args,1)
@@ -10,6 +10,7 @@ function main(args)
         maplat2=subwrd(args,3)
         maplon1=subwrd(args,4)
         maplon2=subwrd(args,5)
+        profout=subwrd(args,6)
     endif
 
     say "profcode set to: "profcode
@@ -17,6 +18,7 @@ function main(args)
     say "maplat2 set to: "maplat2
     say "maplon1 set to: "maplon1
     say "maplon2 set to: "maplon2
+    say "profout set to: "profout
 
     'set warn off'
     'set display color white'
@@ -35,9 +37,9 @@ function main(args)
     cols= '6 2 8 12 7 10 3 13 5 11 4 14 9'
     colstraj='9 14 4 11 5 13 3 10 7 12 8 2 6'
 
-    'sdfopen /data/users/grivera/ARGO-prof/'profcode'_godas.nc'
-    'sdfopen /data/users/grivera/ARGO-prof/'profcode'_soda.nc'
-    'sdfopen /data/users/grivera/ARGO-prof/'profcode'_imarpe.nc'
+    'sdfopen 'profout'/'profcode'_godas.nc'
+    'sdfopen 'profout'/'profcode'_soda.nc'
+    'sdfopen 'profout'/'profcode'_imarpe.nc'
     'xdfopen /data/users/grivera/GODAS/clim/godas_dayclim.ctl'
 
 ***************
@@ -109,7 +111,7 @@ function main(args)
     status=0
     'set line 1 1 5'
     while (status != 2)
-        marks = read('/data/users/grivera/ARGO-prof/'profcode'-traj1.txt')
+        marks = read(''profout'/'profcode'-traj1.txt')
         status = subwrd(marks,1)
         if (status=2)
             break
@@ -171,7 +173,7 @@ function main(args)
     status=0
     'set line 1 1 5'
     while (status != 2)
-        marks = read('/data/users/grivera/ARGO-prof/'profcode'-traj2.txt')
+        marks = read(''profout'/'profcode'-traj2.txt')
         status = subwrd(marks,1)
         if (status=2)
             break
@@ -235,7 +237,7 @@ function main(args)
     status=0
     'set line 1 1 5'
     while (status != 2)
-        marks = read('/data/users/grivera/ARGO-prof/'profcode'-traj3.txt')
+        marks = read(''profout'/'profcode'-traj3.txt')
         status = subwrd(marks,1)
         if (status=2)
             break
@@ -308,7 +310,7 @@ function main(args)
     n=0
     col = 9
     while (status != 2)
-        marks = read('/data/users/grivera/ARGO-prof/'profcode'-traj4.txt')
+        marks = read(''profout'/'profcode'-traj4.txt')
         status = subwrd(marks,1)
         if (status=2)
             break
@@ -364,7 +366,7 @@ function main(args)
     st=0
     k=0
     while (st != 2)
-        mark = read('/data/users/grivera/ARGO-prof/'profcode'-traj5.txt')
+        mark = read(''profout'/'profcode'-traj5.txt')
         st = subwrd(mark,1)
         if (st=2)
             break
