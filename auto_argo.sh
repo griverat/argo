@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 #Created on Sun Jun 9 06:07:19 2019
 #Author: Gerardo A. Rivera Tello
 #Email: grivera@igp.gob.pe
@@ -9,7 +9,6 @@
 source /home/grivera/miniconda3/etc/profile.d/conda.sh
 conda activate Work
 
-OUTDIR=/data/users/grivera
 SCR_DIR=/home/grivera/GitLab/argo
 
 cd $SCR_DIR || exit
@@ -22,11 +21,13 @@ cd "$SCR_DIR/Profiler_list" || exit
 python argo_floatpos.py
 python argo_to_json.py
 
-cp Output/* $OUTDIR/ARGO-latlon/
-
 ##############################
 #    Build Trajectory plot   #
 ##############################
+
+module unload grads/2.0.2 
+module load opengrads/2.2.1.oga.1
+export GADDIR=/opt/opengrads/2.2.1.oga.1/data
 
 cd "$SCR_DIR/Trajectory" || exit
 
