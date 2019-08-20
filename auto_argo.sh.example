@@ -34,6 +34,14 @@ cd "$SCR_DIR/Trajectory" || exit
 sh argo_run_traj.sh
 
 ##############################
+#     Build tracker plot     #
+##############################
+
+cd "$SCR_DIR/Tracker" || exit
+
+sh auto_tracker.sh
+
+##############################
 #   Build multiple profiles  #
 ##############################
 
