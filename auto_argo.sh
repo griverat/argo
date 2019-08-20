@@ -38,4 +38,4 @@ sh argo_run_traj.sh
 
 cd "$SCR_DIR/Region_data" || exit
 
-# sh argo_region_nc.sh
+sh argo_region_nc.sh
