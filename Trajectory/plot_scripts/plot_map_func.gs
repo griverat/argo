@@ -26,7 +26,7 @@ function main(args)
     'set grads off'
     'rgbset2'
 
-    outdir='../Output/'
+    outdir='../Output/'profcode'/'
     name='prof'profcode'_clim_trajr'
 
     iso=16
