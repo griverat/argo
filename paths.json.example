@@ -5,5 +5,7 @@
     "ARGO_PROF_OUT": "/data/users/grivera/ARGO-prof",
     "TRAJ_DIR": "/home/grivera/GitLab/argo/Trajectory",
     "TRAJ_PLOT_DIR": "/home/grivera/GitLab/argo/Trajectory/plot_scripts",
-    "ARGO_PATCH_OUT":"/data/users/grivera/ARGO-patch"
+    "TRAJ_PLOT_OUT": "/home/grivera/GitLab/argo/Trajectory/Output",
+    "ARGO_PATCH_OUT": "/data/users/grivera/ARGO-patch",
+    "TRACKER_OUT": "/data/users/grivera/GitLab/argo/Tracker/Output"
 }
