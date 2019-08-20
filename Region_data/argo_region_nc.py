@@ -53,23 +53,22 @@ def get_temp_anom(fname, prof, clim, grid=np.arange(0, 2001, 2.0)):
 
     day = clim.interp(level=grid)
     data = np.array([new_data - day.data, new_data])
-    return da.from_array(data, chunks=(100, 100))
+    return data
 
 
 @delayed
 def dastack(data):
-    return da.stack(data, axis=0)
+    return np.stack(data, axis=0)
 
 
 def update_nc():
     pass
 
 
-def save_nc(
-    argodb, argo_data, filename, varname, lon, lat, grid, outdir=paths["ARGO_PATCH_OUT"]
-):
-    argo_data = argo_data.compute()
+def save_nc(argodb, argo_data, filename, vname, lon, lat, grid, outdir):
+    # argo_data = argo_data.compute()
     argo_count = argodb.groupby("date").size().resample("1D").asfreq().values
+    print("Resampling to daily data")
     argo_data = (
         xr.DataArray(
             argo_data,
@@ -81,15 +80,18 @@ def save_nc(
     )
     mlon = np.mean(lon)
     mlat = np.mean(lat)
+    print("Creating dataset")
+    argo_time = argo_data.time.values
+    argo_data = np.array([[argo_data.data]])
     argo_data = xr.Dataset(
         {
-            varname: (["lat", "lon", "time", "level"], np.array([[argo_data.data]])),
+            vname: (["lat", "lon", "time", "level"], argo_data),
             "prof_count": (["lat", "lon", "time"], np.array([[argo_count]])),
         },
         coords={
             "lon": [mlon],
             "lat": [mlat],
-            "time": argo_data.time.values,
+            "time": argo_time,
             "level": grid.astype(np.int64),
         },
     )
@@ -97,6 +99,7 @@ def save_nc(
     argo_data.lat.attrs["units"] = "degrees_east"
     argo_data.level.attrs["units"] = "m"
     argo_data.attrs["author"] = "SCAH - IGP"
+    print("Saving dataset")
     argo_data.to_netcdf(
         os.path.join(
             outdir,
@@ -105,6 +108,7 @@ def save_nc(
             ),
         )
     )
+    print("saving done\n")
 
 
 def get_fn(date, ARGO_DIR, temp):
@@ -121,7 +125,6 @@ def main(lat, lon, time):
     client = setup_cluster()
     print(client)
     GODAS_GLOB = "/data/users/grivera/GODAS/clim/daily/*.godas_dayclim.nc"
-    dfmt = "{:%Y-%m-%d}"
 
     argodb = pd.read_csv(paths["ARGO_DB"], parse_dates=[0])
     grid = np.arange(0, 2001, 2.0)
@@ -138,27 +141,47 @@ def main(lat, lon, time):
     godas_clim = xr.open_mfdataset(GODAS_GLOB, parallel=True).pottmp - 273
     godas_clim = (
         godas_clim.sel(
-            time=slice(
-                dfmt.format(newdf.date.iloc[0]), dfmt.format(newdf.date.iloc[-1])
-            ),
+            time=slice(newdf.date.iloc[0], newdf.date.iloc[-1]),
             lat=slice(lat[0], lat[1]),
             lon=slice(lon[0], lon[1]),
         )
         .mean(dim=["lat", "lon"])
-        .load()
+        .persist()
     )
-    print("Done \n")
+    progress(godas_clim)
+    godas_clim = godas_clim.compute()
+    print("\nDone \n")
+    print("Computing region average")
     new_data = dastack(
         [
-            get_temp_anom(r.fname, r.nprof, godas_clim.sel(time=dfmt.format(r.date)))
+            get_temp_anom(r.fname, r.nprof, godas_clim.sel(time=r.date))
             for r in newdf.itertuples()
         ]
     )
     new_data = new_data.persist()
     progress(new_data)
     new_data = new_data.compute()
-    save_nc(newdf, new_data[:, 0, :], "argo_tanom", "tanom", lon, lat, grid)
-    save_nc(newdf, new_data[:, 1, :], "argo_temp", "temp", lon, lat, grid)
+    print("\nDone\n")
+    save_nc(
+        newdf,
+        new_data[:, 0, :],
+        "argo_tanom",
+        "tanom",
+        lon,
+        lat,
+        grid,
+        paths["ARGO_PATCH_OUT"],
+    )
+    save_nc(
+        newdf,
+        new_data[:, 1, :],
+        "argo_temp",
+        "temp",
+        lon,
+        lat,
+        grid,
+        paths["ARGO_PATCH_OUT"],
+    )
 
 
 if __name__ == "__main__":
@@ -166,4 +189,5 @@ if __name__ == "__main__":
     lons = [float(sys.argv[3]), float(sys.argv[4])]
     tran = [str(sys.argv[5]), str(sys.argv[6])]
     main(lats, lons, tran)
+    print("\nbeep boop it's all done\n\n")
     # main([-2.5,2.5],[253,260],['1999-01-01', '2019-03-14'])
