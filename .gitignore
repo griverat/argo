@@ -8,3 +8,5 @@
 argo_merge-profile_index.txt
 auto_argo.sh
 paths.json
+argo_run_traj.sh
+argo_region_nc.sh
