@@ -13,7 +13,6 @@ import json
 import argparse
 import datetime
 import os
-from ..utils import check_folder
 
 import cartopy.crs as ccrs
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
@@ -27,6 +26,15 @@ with open("./../paths.json") as f:
     paths = json.load(f)
 
 plt.style.use("seaborn-paper")
+
+
+def check_folder(base_path, name=None):
+    if name is not None:
+        out_path = os.path.join(base_path, str(name))
+    else:
+        out_path = base_path
+    if not os.path.exists(out_path):
+        os.mkdirs(name)
 
 
 class Argo_plot(object):

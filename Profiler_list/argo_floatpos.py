@@ -12,13 +12,21 @@ Copyright (c) 2018 Instituto Geofisico del Peru
 from dask.distributed import Client, LocalCluster
 from distributed.diagnostics.progressbar import progress
 from dask import delayed
-from ..utils import check_folder
 import dask.dataframe as dd
 import xarray as xr
 import pandas as pd
 import numpy as np
 import json
 import os
+
+
+def check_folder(base_path, name=None):
+    if name is not None:
+        out_path = os.path.join(base_path, str(name))
+    else:
+        out_path = base_path
+    if not os.path.exists(out_path):
+        os.mkdirs(name)
 
 
 @delayed

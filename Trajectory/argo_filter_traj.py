@@ -10,8 +10,8 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 """
 
 from datetime import datetime
+
 # from send_email import send_mail
-from ..utils import check_folder
 import pandas as pd
 import argparse
 import json
@@ -110,6 +110,15 @@ def filter_traj(prof_num, argo_db):
         return True
     else:
         return False
+
+
+def check_folder(base_path, name=None):
+    if name is not None:
+        out_path = os.path.join(base_path, str(name))
+    else:
+        out_path = base_path
+    if not os.path.exists(out_path):
+        os.mkdirs(name)
 
 
 def main(prof_num, lats, lons):

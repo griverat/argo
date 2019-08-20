@@ -11,7 +11,6 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 
 from scipy.interpolate import PchipInterpolator
 from dask.diagnostics import ProgressBar
-from ..utils import check_folder
 import xarray as xr
 import pandas as pd
 import numpy as np
@@ -22,6 +21,15 @@ import os
 
 with open("./../paths.json") as f:
     paths = json.load(f)
+
+
+def check_folder(base_path, name=None):
+    if name is not None:
+        out_path = os.path.join(base_path, str(name))
+    else:
+        out_path = base_path
+    if not os.path.exists(out_path):
+        os.mkdirs(name)
 
 
 def test_qc(qc):
