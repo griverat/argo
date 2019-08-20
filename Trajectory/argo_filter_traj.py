@@ -10,7 +10,7 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 """
 
 from datetime import datetime
-from send_email import send_mail
+# from send_email import send_mail
 from ..utils import check_folder
 import pandas as pd
 import argparse
@@ -120,7 +120,7 @@ def main(prof_num, lats, lons):
     if update:
         check_folder(out_plot, prof_num)
         launch_grads(prof_num, lats, lons)
-        send_mail(prof_num)
+        # send_mail(prof_num)
 
 
 def getArgs(argv=None):
