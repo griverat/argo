@@ -11,6 +11,7 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 
 from scipy.interpolate import PchipInterpolator
 from dask.diagnostics import ProgressBar
+from ..utils import check_folder
 import xarray as xr
 import pandas as pd
 import numpy as np
@@ -233,6 +234,7 @@ if __name__ == "__main__":
     print("Climatologies loaded")
 
     print("\n\n### Starting computation ###\n")
+    check_folder(paths["ARGO_PROF_OUT"])
     main(
         PROF_FILE,
         paths["ARGO_DB_OUT"],

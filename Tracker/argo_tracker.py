@@ -12,6 +12,8 @@ import numpy as np
 import json
 import argparse
 import datetime
+import os
+from ..utils import check_folder
 
 import cartopy.crs as ccrs
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
@@ -148,6 +150,8 @@ def getArgs(argv=None):
 
 if __name__ == "__main__":
     ARGODB = paths["ARGO_DB"]
+    TRACKER_OUT = paths["TRACKER_OUT"]
+    check_folder(TRACKER_OUT)
     argo_db = (
         pd.read_csv(ARGODB, parse_dates=[0]).sort_values("date").reset_index(drop=True)
     )
@@ -161,4 +165,4 @@ if __name__ == "__main__":
     dataf = filter_db(argo_db, args.days, args.reg_list)
 
     Argo_plot.plot_data(dataf, "Fecha")
-    Argo_plot.save_fig(f"Output/argo_tracker_{args.name}")
+    Argo_plot.save_fig(os.path.join(TRACKER_OUT, f"argo_tracker_{args.name}"))

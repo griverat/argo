@@ -12,6 +12,7 @@ Copyright (c) 2018 Instituto Geofisico del Peru
 from dask.distributed import Client, LocalCluster
 from distributed.diagnostics.progressbar import progress
 from dask import delayed
+from ..utils import check_folder
 import dask.dataframe as dd
 import xarray as xr
 import pandas as pd
@@ -118,4 +119,5 @@ def main(update=False, outdir=os.getcwd(), ARGO_DIR="/data/datos/ARGO/data/"):
 if __name__ == "__main__":
     with open("./../paths.json") as f:
         paths = json.load(f)
-    main(update=True, outdir=os.path.join(os.getcwd(), paths["ARGO_DB_OUT"]))
+    check_folder(paths["ARGO_DB_OUT"])
+    main(update=True, outdir=paths["ARGO_DB_OUT"])
