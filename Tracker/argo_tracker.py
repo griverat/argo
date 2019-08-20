@@ -34,7 +34,7 @@ def check_folder(base_path, name=None):
     else:
         out_path = base_path
     if not os.path.exists(out_path):
-        os.mkdirs(name)
+        os.makedirs(name)
 
 
 class Argo_plot(object):
