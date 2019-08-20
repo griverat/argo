@@ -10,3 +10,4 @@ dependencies:
   - distributed
   - gsw
   - netcdf4
+  - cartopy
