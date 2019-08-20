@@ -68,7 +68,7 @@ def build_profile(argo_number, argo_db, argo_dir, outdir):
 def main(prof_file, DB_DIR, ARGO_DIR, OUTPUT_DIR):
     prof_list = np.loadtxt(prof_file, dtype=int)
     argo_db = (
-        pd.read_csv(os.path.join(DB_DIR, "latlontemp.txt"), parse_dates=[0])
+        pd.read_csv(os.path.join(DB_DIR, "argo_latlon.txt"), parse_dates=[0])
         .sort_values("date")
         .reset_index(drop=True)
     )

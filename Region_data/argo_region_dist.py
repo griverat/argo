@@ -104,7 +104,7 @@ class DistPlot(object):
 
 
 def read_argodb(dbdir):
-    argodb = pd.read_csv(os.path.join(dbdir, "latlontemp.txt"), parse_dates=[0])
+    argodb = pd.read_csv(os.path.join(dbdir, "argo_latlon.txt"), parse_dates=[0])
     return argodb
 
 

@@ -202,7 +202,7 @@ if __name__ == "__main__":
     dates = ("1999-01-01", "2019-12-31")
     lats = (-20, 10)
     lons = (250, 290)
-    data = load_data("/data/users/grivera/ARGO-latlon/latlontemp.txt")
+    data = load_data("/data/users/grivera/ARGO-latlon/argo_latlon.txt")
     pcoords = ([-20, 10], [250, 290])
 
     Hist = ArgoHist()
