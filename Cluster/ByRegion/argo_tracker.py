@@ -161,4 +161,4 @@ if __name__ == "__main__":
     dataf = filter_db(argo_db, args.days, args.reg_list)
 
     Argo_plot.plot_data(dataf, "Fecha")
-    Argo_plot.save_fig(f"figs/argo_tracker_{args.name}")
+    Argo_plot.save_fig(f"Output/argo_tracker_{args.name}")
