@@ -9,3 +9,4 @@ dependencies:
   - dask
   - distributed
   - gsw
+  - netcdf4
