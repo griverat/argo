@@ -151,9 +151,7 @@ class ArgoHist(object):
                 levels=np.linspace(0, self.zi.max(), nlevs + 1),
             )
         cbaxes = self.fig.add_axes(cbar_axes)
-        cbar = plt.colorbar(
-            draw, cax=cbaxes, ticks=boundaries, extend="max", **cbar_kwargs
-        )
+        plt.colorbar(draw, cax=cbaxes, ticks=boundaries, extend="max", **cbar_kwargs)
 
         self.ax.tick_params(labelsize="medium")
 
