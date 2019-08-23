@@ -141,7 +141,7 @@ class ArgoHist(object):
                 linewidths=np.linspace(0, 3, nlevs + 1),
             )
             cmap = self.custom_cmap()
-            cs = self.ax.contourf(
+            self.ax.contourf(
                 self.xi,
                 self.yi,
                 self.zi.reshape(self.xi.shape),
