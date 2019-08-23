@@ -163,15 +163,19 @@ class ArgoHist(object):
                 height=region[0][1] - region[0][0],
                 transform=ccrs.PlateCarree(),
                 zorder=30,
-                **kwargs
+                **kwargs,
             )
         )
 
     def show(self, output, batch):
         if not batch:
             plt.show()
-        self.fig.savefig(os.path.join(output, "hist+kde_argo.eps"), bbox_inches="tight")
-        self.fig.savefig(os.path.join(output, "hist+kde_argo.png"), bbox_inches="tight")
+        eps = os.path.join(output, "hist+kde_argo.eps")
+        png = os.path.join(output, "hist+kde_argo.png")
+        gif = os.path.join(output, "hist+kde_argo.gif")
+        self.fig.savefig(eps, bbox_inches="tight")
+        self.fig.savefig(png, bbox_inches="tight")
+        os.system(f"convert {eps} {gif}")
 
 
 def load_data(filename):
@@ -228,7 +232,7 @@ if __name__ == "__main__":
         contours=True,
         nlevs=10,
         cbar_kwargs={"orientation": "horizontal", "drawedges": True},
-        cbar_axes=[0.39, 0.15, 0.085, 0.01]
+        cbar_axes=[0.39, 0.15, 0.085, 0.01],
     )
     kwargs = {"fill": False, "edgecolor": "black", "linewidth": 2, "ls": "--"}
     bbox = dict(boxstyle="round", facecolor="white", pad=0.2)
