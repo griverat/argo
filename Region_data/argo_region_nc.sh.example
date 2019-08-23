@@ -26,4 +26,4 @@ python argo_region_nc.py -22 -16 272.5 280 1999-01-01 2019-12-31
 
 python plot_patch.py
 
-sh convert_eps "*zones.eps"
+sh convert_eps.sh "*zones.eps"
