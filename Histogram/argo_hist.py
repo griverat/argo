@@ -12,6 +12,7 @@ Copyright (c) 2018 Instituto Geofisico del Peru
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 from scipy.stats.kde import gaussian_kde
 from sklearn.neighbors.kde import KernelDensity
+import matplotlib.patches as mpatches
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -56,10 +57,10 @@ class ArgoHist(object):
         ]
         self.zi = k(np.vstack([self.xi.flatten(), self.yi.flatten()]))
 
-    def get_kde_scipy(self):
+    def get_kde_scipy(self, bw=1.5):
         x = self.filt_data["lon"].values
         y = self.filt_data["lat"].values
-        k = KernelDensity(kernel="gaussian", bandwidth=1.5).fit(np.vstack([x, y]).T)
+        k = KernelDensity(kernel="gaussian", bandwidth=bw).fit(np.vstack([x, y]).T)
         self.xi, self.yi = np.mgrid[
             x.min() : x.max() : self.H.shape[1] * 1j,
             y.min() : y.max() : self.H.shape[0] * 1j,
@@ -71,7 +72,7 @@ class ArgoHist(object):
     def setup_plot(self, lat1, lat2, lon1, lon2):
         plt.style.use("seaborn-paper")
         self.fig, self.ax = plt.subplots(
-            subplot_kw=dict(projection=self.proj), figsize=(24, 12), dpi=300
+            subplot_kw=dict(projection=self.proj), figsize=(24, 12), dpi=400
         )
         self.ax.set_xticks(np.arange(0, 360, 5), crs=ccrs.PlateCarree())
         self.ax.set_yticks(np.arange(-90, 90, 2.5), crs=ccrs.PlateCarree())
@@ -98,7 +99,17 @@ class ArgoHist(object):
         cmap = cmap.from_list("Custom cmap", cmaplist, cmap.N)
         return cmap
 
-    def plot(self, plats, plons, bmax=50, bint=10, nlevs=8, contours=True):
+    def plot(
+        self,
+        plats,
+        plons,
+        bmax=50,
+        bint=10,
+        nlevs=8,
+        contours=True,
+        cbar_kwargs={},
+        cbar_axes=[],
+    ):
         self.setup_plot(*plats, *plons)
         boundaries = np.arange(0, bmax + 1, bint)
         cmap_reds = plt.cm.get_cmap("Blues", len(boundaries))
@@ -107,7 +118,6 @@ class ArgoHist(object):
         cmap = mpl.colors.ListedColormap(colors[:-1], "")
         cmap.set_over(colors[-1])
 
-        norm = mpl.colors.BoundaryNorm(boundaries, ncolors=len(boundaries) - 1)
         draw = self.ax.pcolormesh(
             self.X,
             self.Y,
@@ -118,14 +128,14 @@ class ArgoHist(object):
             cmap=cmap,
             vmin=0,
             vmax=bmax,
-            norm=norm,
+            norm=mpl.colors.BoundaryNorm(boundaries, ncolors=len(boundaries) - 1),
         )
         if contours:
             self.ax.contour(
                 self.xi,
                 self.yi,
                 self.zi.reshape(self.xi.shape),
-                levels=nlevs,
+                levels=np.linspace(0, self.zi.max(), nlevs + 1),
                 transform=ccrs.PlateCarree(),
                 cmap=plt.get_cmap("pink_r", nlevs),
                 linewidths=np.linspace(0, 3, nlevs + 1),
@@ -137,32 +147,33 @@ class ArgoHist(object):
                 self.zi.reshape(self.xi.shape),
                 transform=ccrs.PlateCarree(),
                 cmap=cmap,
-                hatches=[None] * (nlevs - 2) + ["\\\\", "//", "--"],
-                levels=nlevs,
+                hatches=[None] * (nlevs - 3) + ["\\\\", "//", "--"],
+                levels=np.linspace(0, self.zi.max(), nlevs + 1),
             )
-            artists, labels = cs.legend_elements()
-            del labels
-            self.ax.legend(
-                artists[-3:],
-                ["", "", ""],
-                handleheight=2,
-                title="High density",
-                fancybox=True,
-                fontsize="large",
-            )
-        cbar = plt.colorbar(draw, ticks=boundaries, extend="max", pad=0)
-        cbar.ax.tick_params(labelsize=15)
+        cbaxes = self.fig.add_axes(cbar_axes)
+        cbar = plt.colorbar(
+            draw, cax=cbaxes, ticks=boundaries, extend="max", **cbar_kwargs
+        )
+
         self.ax.tick_params(labelsize="medium")
+
+    def add_patch(self, region, kwargs={}):
+        self.ax.add_patch(
+            mpatches.Rectangle(
+                xy=[region[1][0], region[0][0]],
+                width=region[1][1] - region[1][0],
+                height=region[0][1] - region[0][0],
+                transform=ccrs.PlateCarree(),
+                zorder=30,
+                **kwargs
+            )
+        )
 
     def show(self, output, batch):
         if not batch:
             plt.show()
-        self.fig.savefig(
-            os.path.join(output, "hist+kde_argo.eps"), bbox_inches="tight", pad_inches=0
-        )
-        self.fig.savefig(
-            os.path.join(output, "hist+kde_argo.png"), bbox_inches="tight", pad_inches=0
-        )
+        self.fig.savefig(os.path.join(output, "hist+kde_argo.eps"), bbox_inches="tight")
+        self.fig.savefig(os.path.join(output, "hist+kde_argo.png"), bbox_inches="tight")
 
 
 def load_data(filename):
@@ -200,17 +211,33 @@ def filter_data(data, min_lat, max_lat, min_lon, max_lon, time1, time2, val=None
 
 if __name__ == "__main__":
     dates = ("1999-01-01", "2019-12-31")
-    lats = (-20, 10)
+    lats = (-60, 5)
     lons = (250, 290)
     data = load_data("/data/users/grivera/ARGO-latlon/argo_latlon.txt")
-    pcoords = ([-20, 10], [250, 290])
+    pcoords = ([-60, 5], [250, 295])
 
     Hist = ArgoHist()
     Hist.load_data(data)
 
     Hist.filter_data(dates, lats, lons, bin_size=0.5)
     Hist.get_histogram()
-    Hist.get_kde_scipy()
+    Hist.get_kde_scipy(bw=1.2)
 
-    Hist.plot(*pcoords, bmax=100, bint=10, contours=True, nlevs=8)
+    Hist.plot(
+        *pcoords,
+        bmax=100,
+        bint=10,
+        contours=True,
+        nlevs=10,
+        cbar_kwargs={"orientation": "horizontal", "drawedges": True},
+        cbar_axes=[0.39, 0.15, 0.085, 0.01]
+    )
+    kwargs = {"fill": False, "edgecolor": "black", "linewidth": 2, "ls": "--"}
+    bbox = dict(boxstyle="round", facecolor="white", pad=0.2)
+
+    Hist.ax.annotate("Zone 2", xy=(94, -23.8), bbox=bbox, size=15)
+    Hist.ax.annotate("Zone 1", xy=(73.2, -3.4), bbox=bbox, size=15)
+
+    Hist.add_patch([(-1.5, 2.5), (252.5, 259)], kwargs=kwargs)
+    Hist.add_patch([(-22, -16), (272.5, 280)], kwargs=kwargs)
     Hist.show("/home/grivera/GitLab/argo/Histogram/Output", True)
