@@ -19,7 +19,17 @@ import matplotlib as mpl
 import cartopy.feature as cfeature
 import numpy as np
 import pandas as pd
+import json
 import os
+
+
+def check_folder(base_path, name=None):
+    if name is not None:
+        out_path = os.path.join(base_path, str(name))
+    else:
+        out_path = base_path
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
 
 
 class ArgoHist(object):
@@ -212,10 +222,14 @@ def filter_data(data, min_lat, max_lat, min_lon, max_lon, time1, time2, val=None
 
 
 if __name__ == "__main__":
+    with open("./../paths.json") as f:
+        paths = json.load(f)
+    check_folder(paths["ARGO_HIST_OUT"])
+
     dates = ("1999-01-01", "2019-12-31")
     lats = (-60, 5)
     lons = (250, 290)
-    data = load_data("/data/users/grivera/ARGO-latlon/argo_latlon.txt")
+    data = load_data(paths["ARGO_DB"])
     pcoords = ([-60, 5], [250, 295])
 
     Hist = ArgoHist()
@@ -242,4 +256,4 @@ if __name__ == "__main__":
 
     Hist.add_patch([(-1.5, 2.5), (252.5, 259)], kwargs=kwargs)
     Hist.add_patch([(-22, -16), (272.5, 280)], kwargs=kwargs)
-    Hist.show("/home/grivera/GitLab/argo/Histogram/Output", True)
+    Hist.show(paths["ARGO_HIST_OUT"], True)
