@@ -12,6 +12,7 @@ function main(args)
 
     compute=1
     'c'
+    'set warn off'
     if (compute = 1)
         'reinit'
         'set display color white'
