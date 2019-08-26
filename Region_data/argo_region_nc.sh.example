@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --partition mpi_short2
-#SBATCH --nodes 1
-#SBATCH --ntasks-per-node 4
-#SBATCH --time 04:00:00
-#SBATCH --job-name ARGO_region_nc
-#SBATCH --output logs/argo_region_nc-%J.txt
+#Created on Fri Aug 23 05:48:12 2019
+#Author: Gerardo A. Rivera Tello
+#Email: grivera@igp.gob.pe
+#-----
+#Copyright (c) 2019 Instituto Geofisico del Peru
+#-----
 
 conda activate Work
 
