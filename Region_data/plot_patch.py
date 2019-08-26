@@ -16,4 +16,4 @@ if __name__ == "__main__":
     with open("./../paths.json") as f:
         paths = json.load(f)
     os.chdir(os.path.join(paths["ARGO_REG_DIR"], "plot_scripts"))
-    os.system("grads -blc 'run argo_zones.gs {}'".format(paths["ARGO_PATCH_OUT"]))
+    os.system('grads -blc "run argo_zones.gs {}"'.format(paths["ARGO_PATCH_OUT"]))
