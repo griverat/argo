@@ -17,4 +17,5 @@ python argo_tracker.py 10 'peru' \
 python argo_tracker.py 10 'eqstrat' \
     --reg_list='-1.5,2;252.5,259' \
     --reg_list='-22,-16;272.5,280' \
-    --plat -25 5 --plon 250 285
+    --reg_list='-10,0;270,280' \
+    --plat -25 5 --plon 250 295

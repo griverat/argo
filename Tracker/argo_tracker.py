@@ -41,7 +41,7 @@ class Argo_plot(object):
     def __init__(self, plons, plats):
         self.proj = ccrs.PlateCarree(central_longitude=180)
         self.fig, self.ax = plt.subplots(
-            subplot_kw=dict(projection=self.proj), figsize=(24, 12), dpi=300
+            subplot_kw=dict(projection=self.proj), figsize=(24, 12), dpi=400
         )
         self.ax.set_xticks(np.arange(0, 360, 2.5), crs=ccrs.PlateCarree())
         self.ax.set_yticks(np.arange(-90, 90, 2.5), crs=ccrs.PlateCarree())
@@ -113,7 +113,12 @@ class Argo_plot(object):
         plt.gca().add_artist(leg)
 
     def save_fig(self, name):
-        self.fig.savefig("{}.png".format(name), dpi=300, bbox_inches="tight")
+        eps = "{}.eps".format(name)
+        png = "{}.png".format(name)
+        jpg = "{}.jpg".format(name)
+        self.fig.savefig(png, bbox_inches="tight")
+        self.fig.savefig(eps, bbox_inches="tight")
+        self.fig.savefig(jpg, dpi=60, bbox_inches="tight")
 
 
 def filter_db(database, days_before, reglist):
