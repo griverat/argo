@@ -11,3 +11,4 @@ dependencies:
   - gsw
   - netcdf4
   - cartopy
+  - scikit-learn
