@@ -341,13 +341,22 @@ function main(args)
 
     'set strsiz 0.15 0.2'
     'set string 1 c 5'
+    'draw string 8.5 8.2 1-year Trajectory of'
     'draw string 8.5 7.85 ARGO Profiler #'profcode''
+
+    'set strsiz 0.1 0.15'
+    'set string 1 c 3'
+    'draw string 2.8 8.2 Sea Temperature profile anomalies (`3.`0C)'
 
     'set strsiz 0.093 0.1'
     'set string 1 c 3'
     'draw string 8.5 7.59 'datei'-'datef
 
 
+    'set line 0'
+    'draw mark 5 0.62 7.9 0.18'
+    'draw mark 5 0.62 5.4 0.18'
+    'draw mark 5 0.62 2.9 0.18'
     'set strsiz 0.093 0.1'
     'set string 1 l 6'
     'draw string 0.55 7.9 a)'
