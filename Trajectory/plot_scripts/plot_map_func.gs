@@ -75,6 +75,7 @@ function main(args)
     'd tsuav'
 
     'set gxout contour'
+    'set clab on'
     'set clevs 'clev
     'set cthick 1'
     'd tsuav'
@@ -137,6 +138,7 @@ function main(args)
     'd tsuav'
 
     'set gxout contour'
+    'set clab on'
     'set clevs 'clev
     'set cthick 1'
     'd tsuav'
@@ -199,6 +201,7 @@ function main(args)
     'd tsuav'
 
     'set gxout contour'
+    'set clab on'
     'set clevs 'clev
     'set cthick 1'
     'd tsuav'
