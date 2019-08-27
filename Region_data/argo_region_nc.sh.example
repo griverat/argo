@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 #Created on Fri Aug 23 05:48:12 2019
 #Author: Gerardo A. Rivera Tello
 #Email: grivera@igp.gob.pe
