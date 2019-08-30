@@ -38,7 +38,7 @@ export GADDIR=/opt/opengrads/2.2.1.oga.1/data
 
 cd "$SCR_DIR/Trajectory" || exit
 
-source argo_run_traj.sh
+sh argo_run_traj.sh
 
 ##############################
 #     Build tracker plot     #
@@ -46,7 +46,7 @@ source argo_run_traj.sh
 
 cd "$SCR_DIR/Tracker" || exit
 
-source auto_tracker.sh
+sh auto_tracker.sh
 
 ##############################
 #   Build multiple profiles  #
@@ -54,4 +54,4 @@ source auto_tracker.sh
 
 cd "$SCR_DIR/Region_data" || exit
 
-source argo_region_nc.sh
+sh argo_region_nc.sh
