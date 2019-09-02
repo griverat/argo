@@ -110,6 +110,24 @@ class Argo_plot(object):
             loc=3, fontsize="x-large", frameon=True, fancybox=True, edgecolor="k"
         )
         leg.set_title(title, prop={"size": "x-large"})
+        self.ax.text(
+            0.5,
+            1,
+            "ARGO data locations in the last 10 days\n",
+            fontsize=20,
+            ha="center",
+            transform=self.ax.transAxes,
+        )
+        self.ax.text(
+            0.5,
+            -0.07,
+            "Source: ARGO GDAC      "
+            "Processing: IGP      "
+            "Latest data: {:%d %b %Y}".format(adate),
+            size=15,
+            ha="center",
+            transform=self.ax.transAxes,
+        )
         plt.gca().add_artist(leg)
 
     def save_fig(self, name):
