@@ -121,9 +121,9 @@ class Argo_plot(object):
         self.ax.text(
             0.5,
             -0.07,
-            "Source: ARGO GDAC      "
-            "Processing: IGP      "
-            "Latest data: {:%d %b %Y}".format(adate),
+            "Source: ARGO GDAC        "
+            "Processing: IGP        "
+            "Updated: {:%d %b %Y}".format(tod),
             size=15,
             ha="center",
             transform=self.ax.transAxes,
