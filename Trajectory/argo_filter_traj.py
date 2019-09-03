@@ -97,6 +97,9 @@ def filter_traj(prof_num, argo_db):
     argo_filter = filter_date(prof_num, argo_db, 365)
     argo_filter = group_dates(argo_filter, 30)
     argo_filter.loc[:, "GrADS"] = argo_filter["date"].apply(get_gr)
+    lat_mean, lon_mean = (
+        argo_filter.iloc[1][["lat", "lon"]] + argo_filter.iloc[-1][["lat", "lon"]]
+    ) / 2
     filename = os.path.join(paths["ARGO_PROF_OUT"], "{}-traj{}.txt")
     if check_update(filename.format(prof_num, 1), argo_filter.date.iloc[-1]):
         for i in range(1, 6):
@@ -107,9 +110,9 @@ def filter_traj(prof_num, argo_db):
                 sep=" ",
                 float_format="%.5f",
             )
-        return True
+        return True, (lat_mean, lon_mean)
     else:
-        return False
+        return False, None
 
 
 def check_folder(base_path, name=None):
@@ -125,10 +128,14 @@ def main(prof_num, lats, lons):
     argo_db = pd.read_csv(paths["ARGO_DB"], parse_dates=[0])
     argo_db = argo_db.sort_values("date").reset_index(drop=True)
 
-    update = filter_traj(prof_num, argo_db)
+    update, mcenter = filter_traj(prof_num, argo_db)
     if update:
+        map_bounds = {
+            "lats": (mcenter[0] - 3.5, mcenter[0] + 3.5),
+            "lons": (mcenter[1] - 3.5, mcenter[1] + 3.5),
+        }
         check_folder(out_plot, prof_num)
-        launch_grads(prof_num, lats, lons)
+        launch_grads(prof_num, map_bounds["lats"], map_bounds["lons"])
         # send_mail(prof_num)
 
 
