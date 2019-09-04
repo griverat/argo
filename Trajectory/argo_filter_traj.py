@@ -124,7 +124,7 @@ def check_folder(base_path, name=None):
         os.makedirs(out_path)
 
 
-def main(prof_num, lats, lons):
+def main(prof_num):
     argo_db = pd.read_csv(paths["ARGO_DB"], parse_dates=[0])
     argo_db = argo_db.sort_values("date").reset_index(drop=True)
 
@@ -144,12 +144,10 @@ def getArgs(argv=None):
         description="Plot the last year of data and position of an ARGO float"
     )
     parser.add_argument("profnum", type=int, help="ARGO float id")
-    parser.add_argument("--lat", type=float, nargs=2, help="Lats of the plot")
-    parser.add_argument("--lon", type=float, nargs=2, help="Lons of the plot")
     return parser.parse_args(argv)
 
 
 if __name__ == "__main__":
     args = getArgs()
-    print(args.profnum, args.lat, args.lon)
-    main(args.profnum, args.lat, args.lon)
+    print(args.profnum)
+    main(args.profnum)
