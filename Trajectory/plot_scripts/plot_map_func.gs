@@ -306,6 +306,12 @@ function main(args)
     'draw string 6.2 2.05 50-100nm'
     'draw string 6.2 1.8 0-50nm'
 
+    'set strsiz 0.1 0.11'
+    'draw string 6.2 2.55 Latest position'
+    'set line 1 1 4'
+    'draw mark 3 6.05 2.55 0.06'
+    'draw mark 2 6.05 2.55 0.12'
+
     status=0
     plat=0
     plon=0
