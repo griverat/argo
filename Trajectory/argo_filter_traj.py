@@ -98,7 +98,7 @@ def filter_traj(prof_num, argo_db):
     argo_filter = group_dates(argo_filter, 30)
     argo_filter.loc[:, "GrADS"] = argo_filter["date"].apply(get_gr)
     lat_mean, lon_mean = (
-        argo_filter.iloc[1][["lat", "lon"]] + argo_filter.iloc[-1][["lat", "lon"]]
+        argo_filter.min()[["lat", "lon"]] + argo_filter.max()[["lat", "lon"]]
     ) / 2
     filename = os.path.join(paths["ARGO_PROF_OUT"], "{}-traj{}.txt")
     if check_update(filename.format(prof_num, 1), argo_filter.date.iloc[-1]):
