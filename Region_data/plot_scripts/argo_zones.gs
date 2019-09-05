@@ -133,6 +133,17 @@ function main(args)
     'draw string 0.8 7.9 Latest data: 'dateff1
     'draw string 0.8 4 Latest data: 'dateff2
 
+    'draw recf 0.9 5.15 1.5 5.35'
+    'set line 1'
+    'draw rec 0.9 5.15 1.5 5.35'
+    'draw string 0.95 5.25 Zone 1'
+
+    'set line 0'
+    'draw recf 0.9 1.25 1.5 1.45'
+    'set line 1'
+    'draw rec 0.9 1.25 1.5 1.45'
+    'draw string 0.95 1.35 Zone 2'
+
     'draw string 7.8 0.25 Source: ARGO GDAC   Processing: IGP'
     'draw string 7.8 0.1 Clim: GODAS 1981-2010'
 
