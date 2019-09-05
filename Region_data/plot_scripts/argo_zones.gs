@@ -125,9 +125,6 @@ function main(args)
     'draw string 0.95 7.65 a)'
     'draw string 0.95 3.75 b)'
 
-*    'draw string 5.5 8.2 a) Zone 1 [107.5`3.`0W-101.0`3.`0W] [1.5`3.`0S-2.5`3.`0N]'
-*    'draw string 5.5 4.2 b) Zone 2 [87.5`3.`0W-80.0`3.`0W] [22.0`3.`0S-16.0`3.`0S]'
-
     'set strsiz 0.09 0.1'
     'set string 1 r 4'
     'draw string 10.6 4 11-day running mean'
@@ -188,7 +185,6 @@ function main(args)
     'draw string 10.85 0.9 Count'
 
 
-*'cbarn'
 ************
     'gxprint 'outdir''name'.eps'
     'gxprint 'outdir''name'.png'
