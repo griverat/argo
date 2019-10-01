@@ -87,7 +87,8 @@ def update_data(argo_files, filename="argo_latlon.txt", outdir=os.getcwd()):
 
 def check_bio(argo_db):
     print("\nFetching bioARGO data")
-    os.system("wget -N ftp://ftp.ifremer.fr/ifremer/argo/argo_merge-profile_index.txt")
+    os.system("wget -N ftp://ftp.ifremer.fr/ifremer/argo/argo_merge-profile_index.txt.gz")
+    os.system("gunzip -f argo_merge-profile_index.txt.gz")
     print("Parsing data")
     bio_file = pd.read_csv("argo_merge-profile_index.txt", skiprows=8)
     bio_file["file"] = bio_file["file"].apply(lambda x: int(x.split("/")[1]))
