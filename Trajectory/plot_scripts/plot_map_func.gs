@@ -31,7 +31,7 @@ function main(args)
 
     iso=16
 
-    opt='0.8 0.6 0.8 2 0.6 0.8'
+    opt='0.8 0.6 1 2 0.6 0.8'
     clev='-6 -5 -4 -3 -2 -1 -0.5 0.5 1  2  3  4  5  6'
     ccols='49 48  47 46 44 42 41   0  21 22 24 26 27 28 29'
     cols= '6 2 8 12 7 10 3 13 5 11 4 14 9'
@@ -85,6 +85,10 @@ function main(args)
     'set cthick 6'
     'set clab masked'
     'd temp'
+
+    'set strsiz 0.14'
+    'set string 1 c 5 90'
+    'draw string 0.1 7 Depth'
 
     t0=datef
     y0=500
@@ -149,6 +153,10 @@ function main(args)
     'set clab masked'
     'd temp'
 
+    'set strsiz 0.14'
+    'set string 1 c 5 90'
+    'draw string 0.1 4.51 Depth'
+
     t0=datef
     y0=500
     'q w2xy 't0' 'y0
@@ -212,6 +220,11 @@ function main(args)
     'set clab masked'
     'd temp'
 
+    'set strsiz 0.14'
+    'set string 1 c 5 90'
+    'draw string 0.1 2.02 Depth'
+    
+    'set string 1 bl 5 0'
     'cbarn 0.6 0 2.9 0.4'
 
     t0=datef
@@ -253,7 +266,7 @@ function main(args)
 
 *********************************
     'set dfile 4'
-    'subplot 1 2 2 'opt
+    'subplot 1 2 2 0.8 0.6 0.8 2 0.6 0.8'
     'set mpdset hires'
     'set t last'
     'set lat 'maplat1' 'maplat2
@@ -301,7 +314,7 @@ function main(args)
     'draw mark 5 6.05 1.8 0.2'
 
     'set strsiz 0.1 0.15'
-    'set string 1 l 5'
+    'set string 1 l 5 0'
     'draw string 6.2 2.3 100-200nm'
     'draw string 6.2 2.05 50-100nm'
     'draw string 6.2 1.8 0-50nm'
@@ -350,27 +363,27 @@ function main(args)
 
     'set strsiz 0.15 0.2'
     'set string 1 c 5'
-    'draw string 8.5 8.2 1-year Trajectory of'
-    'draw string 8.5 7.85 ARGO Profiler #'profcode''
+    'draw string 8.3 8.2 1-year Trajectory of'
+    'draw string 8.3 7.85 ARGO Profiler #'profcode''
 
     'set strsiz 0.1 0.15'
     'set string 1 c 3'
-    'draw string 2.8 8.2 Sea Temperature profile anomalies (`3.`0C)'
+    'draw string 2.9 8.2 Sea Temperature profile anomalies (`3.`0C)'
 
     'set strsiz 0.093 0.1'
     'set string 1 c 3'
-    'draw string 8.5 7.59 'datei'-'datef
+    'draw string 8.3 7.59 'datei'-'datef
 
 
     'set line 0'
-    'draw mark 5 0.62 7.9 0.18'
-    'draw mark 5 0.62 5.4 0.18'
-    'draw mark 5 0.62 2.9 0.18'
+    'draw mark 5 0.76 7.9 0.18'
+    'draw mark 5 0.76 5.4 0.18'
+    'draw mark 5 0.76 2.9 0.18'
     'set strsiz 0.093 0.1'
     'set string 1 l 6'
-    'draw string 0.55 7.9 a)'
-    'draw string 0.55 5.4 b)'
-    'draw string 0.55 2.9 c)'
+    'draw string 0.68 7.9 a)'
+    'draw string 0.68 5.4 b)'
+    'draw string 0.68 2.9 c)'
     'draw string 5.95 7.2 d)'
 
 
