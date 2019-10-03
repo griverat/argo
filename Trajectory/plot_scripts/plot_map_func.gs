@@ -72,6 +72,7 @@ function main(args)
     'set yflip on'
     'set clevs 'clev
     'set ccols 'ccols
+    'set ylint 100'
     'd tsuav'
 
     'set gxout contour'
@@ -88,7 +89,7 @@ function main(args)
 
     'set strsiz 0.14'
     'set string 1 c 5 90'
-    'draw string 0.1 7 Depth'
+    'draw string 0.1 6.9 Depth (m)'
 
     t0=datef
     y0=500
@@ -124,7 +125,7 @@ function main(args)
         datepoint=subwrd(marks,6)
         'q w2xy 'datepoint' 500'
         xi=subwrd(result,3); yi=subwrd(result,6)
-        'draw mark 4 'xi' 'yi' 0.05'
+        'draw mark 1 'xi' 'yi' 0.02'
     endwhile
 
 *********************************
@@ -139,6 +140,7 @@ function main(args)
     'set yflip on'
     'set clevs 'clev
     'set ccols 'ccols
+    'set ylint 100'
     'd tsuav'
 
     'set gxout contour'
@@ -155,7 +157,7 @@ function main(args)
 
     'set strsiz 0.14'
     'set string 1 c 5 90'
-    'draw string 0.1 4.51 Depth'
+    'draw string 0.1 4.41 Depth (m)'
 
     t0=datef
     y0=500
@@ -191,7 +193,7 @@ function main(args)
         datepoint=subwrd(marks,6)
         'q w2xy 'datepoint' 500'
         xi=subwrd(result,3); yi=subwrd(result,6)
-        'draw mark 4 'xi' 'yi' 0.05'
+        'draw mark 1 'xi' 'yi' 0.02'
     endwhile
 
 *********************************
@@ -206,6 +208,7 @@ function main(args)
     'set yflip on'
     'set clevs 'clev
     'set ccols 'ccols
+    'set ylint 100'
     'd tsuav'
 
     'set gxout contour'
@@ -222,7 +225,7 @@ function main(args)
 
     'set strsiz 0.14'
     'set string 1 c 5 90'
-    'draw string 0.1 2.02 Depth'
+    'draw string 0.1 1.92 Depth (m)'
     
     'set string 1 bl 5 0'
     'cbarn 0.6 0 2.9 0.4'
@@ -261,7 +264,7 @@ function main(args)
         datepoint=subwrd(marks,6)
         'q w2xy 'datepoint' 500'
         xi=subwrd(result,3); yi=subwrd(result,6)
-        'draw mark 4 'xi' 'yi' 0.05'
+        'draw mark 1 'xi' 'yi' 0.02'
     endwhile
 
 *********************************
@@ -277,6 +280,8 @@ function main(args)
     'set ylint 1'
     'set xlint 1'
     'set ccols 0 0'
+    'set xlopts 1 3 0.14'
+    'set ylopts 1 3 0.14'
     'd pottmp.4'
 
     'set rgb 40 190 190 190 -70'
@@ -408,15 +413,16 @@ function main(args)
         if (k=0)
             'q w2xy 'lon' 'lat
             xi=subwrd(result,3); yi=subwrd(result,6)
-            'draw mark 3 'xi' 'yi' 0.12'
+            'draw mark 3 'xi' 'yi' 0.1'
         else
             'q w2xy 'lon' 'lat
             xi=subwrd(result,3); yi=subwrd(result,6)
-            'draw mark 3 'xi' 'yi' 0.06'
+            'draw mark 3 'xi' 'yi' 0.04'
         endif
         k=k+1
     endwhile
 
+    'draw mark 3 'xi' 'yi' 0.06'
     'set line 1 1 4'
     'q w2xy 'lon' 'lat
     xi=subwrd(result,3); yi=subwrd(result,6)
