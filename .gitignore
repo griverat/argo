@@ -1,6 +1,7 @@
 *.ipynb_checkpoints
 *Output
 .vscode
+.mypy_cache
 *slurm*
 *dask-worker*
 *logs
