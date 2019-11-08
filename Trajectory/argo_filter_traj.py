@@ -10,6 +10,9 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 """
 
 from datetime import datetime
+import geopandas as gpd
+from shapely.geometry import Point
+from geopandas.tools import sjoin
 
 # from send_email import send_mail
 import pandas as pd
@@ -93,10 +96,39 @@ def launch_grads(profcode, lats, lons):
     os.system(f"sh convert_eps.sh '{out_plot}/{profcode}/*.eps'")
 
 
+
+def inreg_db(argo_db):
+    crs = {'init' :'epsg:4326'}
+    fix_lon = argo_db.copy()
+    fix_lon['lon'] = fix_lon['lon'].apply(lambda x: x-360 if x > 180 else x)
+    geometry = [Point(xy) for xy in zip(fix_lon['lon'],fix_lon['lat'])]
+    starts = gpd.GeoDataFrame(fix_lon, crs=crs, geometry=geometry)
+    
+    SA_200 = gpd.read_file("/data/users/grivera/Shapes/costa_200mn_mask.shp")
+    SA_100 = gpd.read_file("/data/users/grivera/Shapes/costa_100mn_mask.shp")
+    SA_50 = gpd.read_file("/data/users/grivera/Shapes/costa_50mn_mask.shp")
+#     SA_300['geometry'] = SA_300.geometry.buffer(1)
+    pointIn200 = sjoin(starts, SA_200, how='left',op="within")
+    pointIn200 = pointIn200.dropna()
+    pointIn100 = sjoin(starts, SA_100, how='left',op="within")
+    pointIn100 = pointIn100.dropna()
+    pointIn50 = sjoin(starts, SA_50, how='left',op="within")
+    pointIn50 = pointIn50.dropna()
+    
+    argo_db['in200'] = '0'
+    argo_db['in100'] = '0'
+    argo_db['in50'] = '0'
+    
+    argo_db.loc[pointIn200.index,'in200']='1'
+    argo_db.loc[pointIn100.index,'in100']='1'
+    argo_db.loc[pointIn50.index,'in50']='1'
+    return argo_db
+
 def filter_traj(prof_num, argo_db):
     argo_filter = filter_date(prof_num, argo_db, 365)
     argo_filter = group_dates(argo_filter, 30)
     argo_filter.loc[:, "GrADS"] = argo_filter["date"].apply(get_gr)
+    argo_filter = inreg_db(argo_filter)
     lat_mean, lon_mean = (
         argo_filter.min()[["lat", "lon"]] + argo_filter.max()[["lat", "lon"]]
     ) / 2
