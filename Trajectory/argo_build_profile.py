@@ -115,6 +115,23 @@ def crop_list(argo_number, argo_db, argo_dir):
     return argo_files, fday
 
 
+def compute_profile(data, ix, dfile, grid, clim):
+    temp, salt = grid_data(data, ix, dfile, grid)
+    lat, lon = data.LATITUDE[ix].data, data.LONGITUDE[ix].data
+    if lon < 0:
+        lon += 360
+    date = data.JULD[ix].data
+    day = (
+        clim.sel(time=pd.to_datetime(date).date())
+        .ffill(dim="lat")
+        .sel(lat=lat, lon=lon, method="nearest")
+    )
+    day = day.interp(level=grid).bfill(dim="level").data
+    if (lat < clim.lat.data.min()) or (lon < clim.lon.data.min()):
+        day[:] = np.nan
+    return lat, lon, date, temp, temp - day, salt
+
+
 def build_profile(argo_number, argo_db, argo_dir, outdir, clim):
     grid = np.arange(0, 2501, 1)
     files, fday = crop_list(argo_number, argo_db, argo_dir)
@@ -127,55 +144,11 @@ def build_profile(argo_number, argo_db, argo_dir, outdir, clim):
         data = xr.open_dataset(dfile)
         if argo_number in data.PLATFORM_NUMBER.data.astype(np.int):
             ix = np.where(data.PLATFORM_NUMBER.data.astype(np.int) == argo_number)[0]
-            if ix.size > 1:
-                for idx in ix:
-                    temp, salt = grid_data(data, idx, dfile, grid)
-                    lat, lon = data.LATITUDE[idx].data, data.LONGITUDE[idx].data
-                    date = data.JULD[idx].data
-                    day = clim.sel(
-                        time=pd.to_datetime(date).date(),
-                        lat=lat,
-                        lon=lon + 360,
-                        method="nearest",
-                    )
-                    day = day.interp(level=grid).data
-                    container.append(
-                        nc_save(
-                            argo_number,
-                            lat,
-                            lon,
-                            date,
-                            temp,
-                            temp - day,
-                            salt,
-                            outdir,
-                            grid,
-                        )
-                    )
-            else:
-                ix = ix[0]
-                temp, salt = grid_data(data, ix, dfile, grid)
-                lat, lon = data.LATITUDE[ix].data, data.LONGITUDE[ix].data
-                if lon < 0:
-                    lon += 360
-                date = data.JULD[ix].data
-                day = (
-                    clim.sel(time=pd.to_datetime(date).date())
-                    .ffill(dim="lat")
-                    .sel(lat=lat, lon=lon, method="nearest")
-                )
-                day = day.interp(level=grid).bfill(dim="level").data
-                if (lat < clim.lat.data.min()) or (lon < clim.lon.data.min()):
-                    day[:] = np.nan
+            for idx in ix:
                 container.append(
                     nc_save(
                         argo_number,
-                        lat,
-                        lon,
-                        date,
-                        temp,
-                        temp - day,
-                        salt,
+                        *compute_profile(data, idx, dfile, grid, clim),
                         outdir,
                         grid,
                     )
@@ -226,17 +199,18 @@ if __name__ == "__main__":
     print("Opening GODAS clim")
     godas_clim = (
         xr.open_mfdataset(
-            "/data/users/grivera/GODAS/clim/daily/*.godas_dayclim.nc"
+            "/data/users/grivera/GODAS/clim/daily/*.godas_dayclim.nc",
+            combine="by_coords",
         ).pottmp
         - 273
     )
     print("Opening IMARPE clim")
     imarpe_clim = xr.open_mfdataset(
-        "/data/users/grivera/IMARPE/clim/daily/*.imarpe_dayclim.nc"
+        "/data/users/grivera/IMARPE/clim/daily/*.imarpe_dayclim.nc", combine="by_coords"
     ).temp
     print("Opening SODA clim")
     soda_clim = xr.open_mfdataset(
-        "/data/users/grivera/SODA/clim/daily/*.soda_dayclim.nc"
+        "/data/users/grivera/SODA/clim/daily/*.soda_dayclim.nc", combine="by_coords"
     ).temp
     clims = dict(godas=godas_clim, imarpe=imarpe_clim, soda=soda_clim)
     print("Climatologies loaded")
