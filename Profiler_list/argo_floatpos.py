@@ -109,6 +109,7 @@ def main(update=False, outdir=os.getcwd(), ARGO_DIR="/data/datos/ARGO/data/"):
         for x in os.listdir(ARGO_DIR)
         if x.endswith("_prof.nc")
     ]
+    argo_files.sort()
     client = setup_cluster()
     print(client)
     if update:
