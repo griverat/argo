@@ -111,8 +111,9 @@ def crop_list(argo_number, argo_db, argo_dir):
         .reset_index(drop=True)
     )
     fday = "{:%Y%m%d}".format(sbt_db.iloc[0].date)
+    lday = "{:%Y%m%d}".format(sbt_db.iloc[-1].date)
     argo_files = sbt_db["date"].apply(lambda x: "{:%Y%m%d}_prof.nc".format(x))
-    return argo_files, fday
+    return argo_files, fday, lday
 
 
 def compute_profile(data, ix, dfile, grid, clim):
@@ -134,10 +135,10 @@ def compute_profile(data, ix, dfile, grid, clim):
 
 def build_profile(argo_number, argo_db, argo_dir, outdir, clim):
     grid = np.arange(0, 2501, 1)
-    files, fday = crop_list(argo_number, argo_db, argo_dir)
+    files, fday, lday = crop_list(argo_number, argo_db, argo_dir)
     with ProgressBar():
         print("Loading daily climatology")
-        clim = clim.sel(time=slice(fday, "2019-12-31")).load()
+        clim = clim.sel(time=slice(fday, lday)).load()
     files = [os.path.join(argo_dir, x) for x in files]
     container = []
     for dfile in files:
