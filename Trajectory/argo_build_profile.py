@@ -53,8 +53,13 @@ def grid_data(data_file, ix, dfile, grid=np.arange(0, 2001, 1)):
     mask = ~np.isnan(temp)
     mask[np.where(depths) == 0] = False
     mask[np.isnan(depths)] = False
-    new_grid = np.where(grid > -depths[mask][-1], np.nan, grid)
-    new_grid[np.where(grid < -depths[mask][0])] = np.nan
+    if depths[mask].size <= 5:
+        return (
+            np.full_like(grid, np.nan, dtype=np.double),
+            np.full_like(grid, np.nan, dtype=np.double),
+        )
+    new_grid = np.where(grid > -depths[mask][-1].data, np.nan, grid)
+    new_grid[np.where(grid < -depths[mask][0].data)] = np.nan
     if temp[mask].size == 1:
         return (
             np.full_like(grid, np.nan, dtype=np.double),
