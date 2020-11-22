@@ -7,7 +7,7 @@
 #-----
 
 source /home/grivera/miniconda3/etc/profile.d/conda.sh
-conda activate Work
+conda activate pangeo
 
 SCR_DIR=/home/grivera/GitLab/argo
 

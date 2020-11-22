@@ -6,7 +6,8 @@
 #Copyright (c) 2019 Instituto Geofisico del Peru
 #-----
 
-conda activate Work
+source /home/grivera/miniconda3/etc/profile.d/conda.sh
+conda activate pangeo
 
 python argo_build_profile.py ../Output/peru.txt
 
