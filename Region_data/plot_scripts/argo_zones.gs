@@ -24,8 +24,8 @@ function main(args)
         name='argo_anom_zones'
 
 **********
-        'sdfopen 'patchdir'/argo_tanom_252.5,259.0_-1.5,2.5.nc'
-        'sdfopen 'patchdir'/argo_temp_252.5,259.0_-1.5,2.5.nc'
+        'sdfopen 'patchdir'/argo_tanom_252.5,259.0_-2.0,2.0.nc'
+        'sdfopen 'patchdir'/argo_temp_252.5,259.0_-2.0,2.0.nc'
 
         'sdfopen 'patchdir'/argo_tanom_272.5,280.0_-22.0,-16.0.nc'
         'sdfopen 'patchdir'/argo_temp_272.5,280.0_-22.0,-16.0.nc'
