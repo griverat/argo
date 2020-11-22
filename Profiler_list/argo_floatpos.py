@@ -46,7 +46,12 @@ def get_data(argo_file):
     date = argo_file.JULD.data[0]
     date = np.repeat(pd.to_datetime(date).date(), len(lons))
     nprof = argo_file.N_PROF.data
-    platfn = argo_file.PLATFORM_NUMBER.data.astype(int)
+    try:
+        platfn = argo_file.PLATFORM_NUMBER.data.astype(int)
+    except Exception as e:
+        return pd.DataFrame(
+            columns=["date", "lat", "lon", "nprof", "platfn", "depth", "bio"]
+        )
     df = {
         "date": date,
         "lat": lats,
@@ -87,14 +92,14 @@ def update_data(argo_files, filename="argo_latlon.txt", outdir=os.getcwd()):
 
 def check_bio(argo_db):
     print("\nFetching bioARGO data")
-    os.system("wget -N ftp://ftp.ifremer.fr/ifremer/argo/argo_merge-profile_index.txt.gz")
-    os.system("gunzip -f argo_merge-profile_index.txt.gz")
+    os.system("wget -N ftp://ftp.ifremer.fr/ifremer/argo/argo_bio-profile_index.txt.gz")
+    os.system("gunzip -f argo_bio-profile_index.txt.gz")
     print("Parsing data")
-    bio_file = pd.read_csv("argo_merge-profile_index.txt", skiprows=8)
+    bio_file = pd.read_csv("argo_bio-profile_index.txt", skiprows=8)
     bio_file["file"] = bio_file["file"].apply(lambda x: int(x.split("/")[1]))
     bio_file = bio_file.loc[:, ["file", "parameters"]]
     mask = bio_file["parameters"].str.contains("DOXY")
-    bio_file = bio_file[mask]["file"].unique()
+    bio_file = bio_file[~mask.isna()]["file"].unique()
     print("Adding bio flags to output file")
     for afloat in bio_file:
         sel = argo_db.query("platfn==@afloat")
