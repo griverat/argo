@@ -10,8 +10,8 @@ Copyright (c) 2018 Instituto Geofisico del Peru
 """
 
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
-from scipy.stats.kde import gaussian_kde
-from sklearn.neighbors.kde import KernelDensity
+from scipy.stats import gaussian_kde
+from sklearn.neighbors import KernelDensity
 import matplotlib.patches as mpatches
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
