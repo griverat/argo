@@ -123,7 +123,7 @@ def compute_profile(data, ix, dfile, grid, clim):
         lon += 360
     date = data.JULD[ix].data
     day = (
-        clim.sel(time=pd.to_datetime(date).date())
+        clim.sel(time=f"{pd.to_datetime(date):%Y-%m-%-d}")
         .ffill(dim="lat")
         .sel(lat=lat, lon=lon, method="nearest")
     )
