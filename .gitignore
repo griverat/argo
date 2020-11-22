@@ -6,6 +6,7 @@
 *dask-worker*
 *logs
 *__pycache__
+*.nc
 argo_merge-profile_index.txt
 auto_argo.sh
 paths.json
