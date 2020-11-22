@@ -47,8 +47,8 @@ def get_temp_anom(fname, prof, clim, grid=np.arange(0, 2001, 2.0)):
         func = PchipInterpolator(-depth[mask], temp[mask])
     except Exception:
         return np.full_like(np.array([grid, grid]), np.nan, dtype=np.double)
-    new_grid = np.where(grid > -depth[mask][-1], np.nan, grid)
-    new_grid[np.where(grid < -depth[mask][0])] = np.nan
+    new_grid = np.where(grid > -depth[mask][-1].data, np.nan, grid)
+    new_grid[np.where(grid < -depth[mask][0].data)] = np.nan
     new_data = func(new_grid)
 
     day = clim.interp(level=grid)
