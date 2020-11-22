@@ -118,7 +118,7 @@ function main(args)
     'set strsiz 0.11 0.12'
     'set string 1 c 4'
     'draw string 5.5 8.35 Sea Temperature profile anomalies with daily histogram of ARGO data count over:'
-    'draw string 5.5 8.15 (a) [107.5`3.`0W-101.0`3.`0W] [1.5`3.`0S-2.5`3.`0N]  and  (b) [87.5`3.`0W-80.0`3.`0W] [22.0`3.`0S-16.0`3.`0S]'
+    'draw string 5.5 8.15 (a) [107.5`3.`0W-101.0`3.`0W] [2`3.`0S-2`3.`0N]  and  (b) [87.5`3.`0W-80.0`3.`0W] [22.0`3.`0S-16.0`3.`0S]'
     'set line 0'
     'draw mark 5 0.95 7.65 0.22'
     'draw mark 5 0.95 3.75 0.22'
