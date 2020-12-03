@@ -31,8 +31,14 @@ def check_folder(base_path, name=None):
 
 @delayed
 def get_data(argo_file):
-    with xr.open_dataset(argo_file) as argo_file:
-        argo_file = argo_file.load()
+    try:
+        with xr.open_dataset(argo_file) as argo_file:
+            argo_file = argo_file.load()
+    except Exception as e:
+        print(f"Error opening file {argo_file}")
+        return pd.DataFrame(
+            columns=["date", "lat", "lon", "nprof", "platfn", "depth", "bio"]
+        )
     lats = argo_file.LATITUDE.data
     lons = argo_file.LONGITUDE.data
     depth = argo_file.PRES.data
