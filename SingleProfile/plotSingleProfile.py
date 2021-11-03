@@ -155,7 +155,7 @@ for _num, argo_code in enumerate(argo_codes):
     f_ax1.grid(ls="--", lw="0.5", alpha=0.5)
     f_ax1.set_title(f"Profile #{argo_sel_interp.PLATFORM_NUMBER[0].data:.0f}")
     plt.figtext(
-        0.02, 0, f"Clim: {_clim.upper()} 1981-2010\nProcessing: IGP", fontsize=5
+        0.02, -0.05, f"Clim: {_clim.upper()} 1981-2010\nProcessing: IGP", fontsize=5
     )
 
     ### PROFILES ###
@@ -200,7 +200,7 @@ for _num, argo_code in enumerate(argo_codes):
 
         ax.set_title(f"{pd.to_datetime(argo_sel_interp.TIME[num].data):%d-%b-%Y}")
         ax.set_ylabel("")
-        ax.set_xlabel("Temperature [°C]")
+        ax.set_xlabel("")
         ax.tick_params(axis="both", which="major", labelsize=8)
         if num == -4:
             ax.set_ylabel("Depth [m]")
@@ -218,6 +218,9 @@ for _num, argo_code in enumerate(argo_codes):
             xycoords="axes fraction",
             bbox=dict(boxstyle="round", fc=None, fill=False),
         )
+
+    fig.text(0.66, -0.02, "Temperature Anomaly [°C]", ha="center", va="center")
+
     fig.savefig(
         os.path.join(
             OUTPATH, f"prof{argo_sel_interp.PLATFORM_NUMBER[0].data:.0f}_{_clim}.png"
