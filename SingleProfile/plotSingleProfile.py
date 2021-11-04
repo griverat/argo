@@ -1,4 +1,5 @@
 import os
+
 import argopy
 import numpy as np
 import pandas as pd
@@ -71,7 +72,9 @@ import cartopy.feature as cfeature
 import gsw
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
-from dmelon.plotting import format_latlon
+from cartopy.io.shapereader import Reader
+from dmelon.plotting import HQ_BORDER, format_latlon
+from matplotlib.patches import Patch
 
 clim = imarpe_clim
 _clim = "IMARPE"
@@ -87,6 +90,31 @@ HQ_SA = cfeature.NaturalEarthFeature(
 )
 
 level = np.arange(0, 900, 10)
+
+c50 = "#C8C8C8"
+c100 = "#DCDCDC"
+c200 = "#F0F0F0"
+
+shape50 = cfeature.ShapelyFeature(
+    Reader("/data/users/grivera/Shapes/NEW_MASK/50mn_full.shp").geometries(),
+    ccrs.PlateCarree(),
+    facecolor=c50,
+)
+
+shape100 = cfeature.ShapelyFeature(
+    Reader("/data/users/grivera/Shapes/NEW_MASK/100mn_full.shp").geometries(),
+    ccrs.PlateCarree(),
+    facecolor=c100,
+)
+shape200 = cfeature.ShapelyFeature(
+    Reader("/data/users/grivera/Shapes/NEW_MASK/200mn_full.shp").geometries(),
+    ccrs.PlateCarree(),
+    facecolor=c200,
+)
+
+patch50 = Patch(facecolor=c50, label="0-50nm", edgecolor="gray")
+patch100 = Patch(facecolor=c100, label="50-100nm", edgecolor="gray")
+patch200 = Patch(facecolor=c200, label="100-200nm", edgecolor="gray")
 
 for _num, argo_code in enumerate(argo_codes):
     argo_sel = ds_profile.where(ds_profile.PLATFORM_NUMBER == argo_code).dropna(
@@ -114,7 +142,7 @@ for _num, argo_code in enumerate(argo_codes):
 
     llat, llon = prof_pos.latitude.iloc[-1], prof_pos.longitude.iloc[-1]
 
-    delta = 1
+    delta = 1.2
     extent = (llon - delta, llon + delta, llat - delta, llat + delta)
     extent_l = tuple(map(round, map(sum, zip(extent, (-5, 5, -5, 5)))))
 
@@ -138,6 +166,7 @@ for _num, argo_code in enumerate(argo_codes):
         prof_pos.latitude.iloc[-10:-1],
         transform=ccrs.PlateCarree(),
         s=3,
+        zorder=10,
     )
 
     f_ax1.scatter(
@@ -146,20 +175,29 @@ for _num, argo_code in enumerate(argo_codes):
         transform=ccrs.PlateCarree(),
         s=10,
         c="r",
+        zorder=10,
     )
-
+    f_ax1.tick_params(axis="both", which="major", labelsize=7)
     f_ax1.set_extent(extent, crs=ccrs.PlateCarree())
     for row in prof_pos[["label", "longitude", "latitude"]].iloc[-10:].itertuples():
-        f_ax1.annotate(row.label, (row.longitude, row.latitude), va="baseline")
+        f_ax1.annotate(
+            row.label, (row.longitude, row.latitude), va="baseline", zorder=11
+        )
+
+    # SHAPES
+    f_ax1.add_feature(shape200)
+    f_ax1.add_feature(shape100)
+    f_ax1.add_feature(shape50, label="50 nm")
     f_ax1.add_feature(HQ_SA)
+
+    f_ax1.legend(
+        handles=[patch200, patch100, patch50], loc="lower left", fontsize=8
+    ).set_zorder(20)
+
     f_ax1.grid(ls="--", lw="0.5", alpha=0.5)
     f_ax1.set_title(f"Profile #{argo_sel_interp.PLATFORM_NUMBER[0].data:.0f}")
-    plt.figtext(
-        0.02, -0.05, f"Clim: {_clim.upper()} 1981-2010\nProcessing: IGP", fontsize=5
-    )
 
     ### PROFILES ###
-
     for num, ax in zip(np.arange(-4, 0, 1), [f_ax2, f_ax3, f_ax4, f_ax5]):
 
         argo_sel_plot = argo_sel_interp.TEMP.isel(TIME=num, drop=True)
@@ -201,7 +239,7 @@ for _num, argo_code in enumerate(argo_codes):
         ax.set_title(f"{pd.to_datetime(argo_sel_interp.TIME[num].data):%d-%b-%Y}")
         ax.set_ylabel("")
         ax.set_xlabel("")
-        ax.tick_params(axis="both", which="major", labelsize=8)
+        ax.tick_params(axis="both", which="major", labelsize=7)
         if num == -4:
             ax.set_ylabel("Depth [m]")
             ax.set_ylim(500, 0)
@@ -218,8 +256,20 @@ for _num, argo_code in enumerate(argo_codes):
             xycoords="axes fraction",
             bbox=dict(boxstyle="round", fc=None, fill=False),
         )
-
-    fig.text(0.66, -0.02, "Temperature Anomaly [°C]", ha="center", va="center")
+    fig.text(
+        0.66, -0.02, "Vertical Sea Temperature Anomaly [°C]", ha="center", va="center"
+    )
+    fig.text(
+        0.02, -0.05, f"Clim: {_clim.upper()} 1981-2010\nProcessing: IGP", fontsize=6
+    )
+    fig.text(
+        0.3,
+        -0.01,
+        f"*Only the last 10 data points are shown",
+        ha="right",
+        va="center",
+        fontsize=5,
+    )
 
     fig.savefig(
         os.path.join(
