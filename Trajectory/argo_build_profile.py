@@ -36,15 +36,15 @@ def test_qc(qc):
     siz = qc.size
     mask = qc == 4
     if mask.sum() > siz / 2:
-        return np.full_like(qc, True, dtype=np.bool)
+        return np.full_like(qc, True, dtype=bool)
     else:
         return qc
 
 
 def grid_data(data_file, ix, dfile, grid=np.arange(0, 2001, 1)):
-    temp_qc = test_qc(data_file.TEMP_QC[ix].astype(np.float))
-    psal_qc = test_qc(data_file.PSAL_QC[ix].astype(np.float))
-    pres_qc = test_qc(data_file.PRES_QC[ix].astype(np.float))
+    temp_qc = test_qc(data_file.TEMP_QC[ix].astype(float))
+    psal_qc = test_qc(data_file.PSAL_QC[ix].astype(float))
+    pres_qc = test_qc(data_file.PRES_QC[ix].astype(float))
     depths = gsw.conversions.z_from_p(
         data_file.PRES[ix].where(pres_qc != 4).data, data_file.LATITUDE[ix].data
     )
@@ -148,8 +148,8 @@ def build_profile(argo_number, argo_db, argo_dir, outdir, clim):
     container = []
     for dfile in files:
         data = xr.open_dataset(dfile)
-        if argo_number in data.PLATFORM_NUMBER.data.astype(np.int):
-            ix = np.where(data.PLATFORM_NUMBER.data.astype(np.int) == argo_number)[0]
+        if argo_number in data.PLATFORM_NUMBER.data.astype(int):
+            ix = np.where(data.PLATFORM_NUMBER.data.astype(int) == argo_number)[0]
             for idx in ix:
                 container.append(
                     nc_save(
