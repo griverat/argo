@@ -245,7 +245,7 @@ for _num, argo_code in enumerate(argo_codes):
             ax.set_ylim(500, 0)
             ax.set_xticks(np.arange(-30, 30, 1.5))
             # ax.set_xlim(0, 25)
-            ax.set_xlim(-3, 3)
+            ax.set_xlim(-3.5, 3.5)
         else:
             ax.tick_params(axis="y", labelleft=False)
 
