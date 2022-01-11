@@ -51,7 +51,17 @@ import regionmask
 
 ### PLOT ###
 def makePlot(
-    psal, psal_raw, temp, temp_raw, sla, taux, tauy, ssta, latest_date, out_path=""
+    psal,
+    psal_raw,
+    temp,
+    temp_raw,
+    sla,
+    taux,
+    tauy,
+    ssta,
+    latest_date,
+    out_path="",
+    depth=850,
 ):
     fig = plt.figure(constrained_layout=True, figsize=(8, 8), dpi=300)
     spec = gridspec.GridSpec(ncols=1, nrows=4, figure=fig, height_ratios=[1, 1, 2, 2])
@@ -68,26 +78,39 @@ def makePlot(
     )
     plot_data_smooth.plot.contourf(
         x="LATITUDE",
-        vmin=34.5,
+        vmin=33.5,
         vmax=35.1,
         cmap=cmo.cm.haline,
-        levels=13,
+        levels=33,
         ax=f_ax0,
         yincrease=False,
-        cbar_kwargs=dict(label="Salinity", pad=-0.09),
+        cbar_kwargs=dict(label="Salinity", pad=-0.09, ticks=np.arange(33.5, 35.2, 0.2)),
     )
     conts = plot_data_smooth.plot.contour(
         x="LATITUDE",
-        vmin=34.5,
+        vmin=33.5,
         vmax=35.1,
-        levels=13,
+        levels=17,
         ax=f_ax0,
         colors="k",
         linewidths=0.2,
         yincrease=False,
     )
 
-    f_ax0.clabel(conts, fontsize=7)
+    lev = conts.levels.copy()
+    lev = lev[lev != 34.9]
+    f_ax0.clabel(conts, levels=lev, fontsize=7, inline_spacing=-7)
+
+    conts = plot_data_smooth.plot.contour(
+        x="LATITUDE",
+        levels=[33.8, 34.8, 35.1],
+        ax=f_ax0,
+        colors="k",
+        linewidths=0.8,
+        yincrease=False,
+    )
+
+    f_ax0.clabel(conts, fontsize=6.73, inline=True, inline_spacing=-7)
 
     f_ax0.scatter(
         psal_raw.LATITUDE,
@@ -100,7 +123,7 @@ def makePlot(
 
     f_ax0.scatter(
         psal_raw.LATITUDE,
-        np.full_like(psal_raw.LATITUDE, 850),
+        np.full_like(psal_raw.LATITUDE, depth),
         c="k",
         s=5,
         marker="s",
@@ -108,7 +131,381 @@ def makePlot(
     )
 
     f_ax0.set_xlim(-20, -2)
-    f_ax0.set_ylim(850, 0)
+    f_ax0.set_ylim(depth, 0)
+    f_ax0.set_ylabel("Depth [m]")
+    f_ax0.set_xlabel("Latitude")
+    f_ax0.grid(ls="--", alpha=0.5)
+
+    ### TEMP
+
+    plot_data_smooth = (
+        temp.interpolate_na(dim="LATITUDE")
+        .rolling(LATITUDE=5, center=True, min_periods=1)
+        .mean()
+    )
+    plot_data_smooth.plot.contourf(
+        x="LATITUDE",
+        vmin=4,
+        vmax=25,
+        cmap=cmo.cm.thermal,
+        levels=22,
+        ax=f_ax1,
+        yincrease=False,
+        cbar_kwargs=dict(label="Temperature [°C]", pad=-0.09),
+    )
+    conts = plot_data_smooth.plot.contour(
+        x="LATITUDE",
+        vmin=4,
+        vmax=25,
+        levels=22,
+        ax=f_ax1,
+        colors="k",
+        linewidths=0.2,
+        yincrease=False,
+    )
+
+    # conts = plot_data_smooth.plot.contour(
+    #     x="LATITUDE",
+    #     vmin=14,
+    #     vmax=29,
+    #     levels=[0],
+    #     ax=f_ax1,
+    #     colors="k",
+    #     linewidths=1,
+    #     yincrease=False,
+    # )
+
+    f_ax1.clabel(conts)
+
+    f_ax1.scatter(
+        temp_raw.LATITUDE,
+        np.full_like(temp_raw.LATITUDE, 0),
+        c="k",
+        s=5,
+        marker="s",
+        clip_on=False,
+    )
+
+    f_ax1.scatter(
+        temp_raw.LATITUDE,
+        np.full_like(temp_raw.LATITUDE, depth),
+        c="k",
+        s=5,
+        marker="s",
+        clip_on=False,
+    )
+
+    f_ax1.set_ylim(depth, 0)
+    f_ax1.set_ylabel("Depth [m]")
+    f_ax1.set_xlabel("Latitude")
+    f_ax1.grid(ls="--", alpha=0.5)
+
+    ### REST
+    (sla.mean(dim=["time", "lon"]) * 100).plot(ax=f_ax2)
+    f_ax2.axhline(ls="--", c="k", lw=0.5)
+    f_ax2.set_yticks(np.arange(-5, 5.1, 2))
+    f_ax2.set_ylim(-5, 5)
+    f_ax2.set_ylabel("SLA [cm]")
+    f_ax2.set_xlabel("Latitude")
+
+    Q = f_ax2.quiver(
+        taux.lat[::2],
+        np.full_like(taux.lat, 0)[::2],
+        tauy.mean(dim=["time", "lon"])[::2] * 100,
+        taux.mean(dim=["time", "lon"])[::2] * -100,
+        units="xy",
+        scale_units="xy",
+        scale=1,
+        width=0.05,
+    )
+    f_ax2.quiverkey(
+        Q,
+        0.92,
+        0.85,
+        1,
+        r"$1x10^{-2} \frac{N}{m^2}$",
+        labelpos="E",
+        coordinates="axes",
+        fontproperties=dict(size=7),
+        labelsep=0.02,
+    )
+
+    f_ax2.text(0.885, 0.885, r"$\tau$", transform=f_ax2.transAxes)
+    f_ax2.grid(ls="--", alpha=0.5)
+
+    card_centerx = 1.06
+    card_centery = 0.5
+    da = 0.04
+    arrowprops = dict(arrowstyle="fancy", facecolor="black")
+
+    f_ax2.annotate(
+        "",
+        xy=(card_centerx + da, card_centery),
+        xytext=(card_centerx, card_centery),
+        arrowprops=arrowprops,
+        xycoords="axes fraction",
+    )
+
+    f_ax2.annotate(
+        "",
+        xy=(card_centerx - da, card_centery),
+        xytext=(card_centerx, card_centery),
+        arrowprops=arrowprops,
+        xycoords="axes fraction",
+    )
+
+    f_ax2.annotate(
+        "",
+        xy=(card_centerx, card_centery + da * 7),
+        xytext=(card_centerx, card_centery),
+        arrowprops=arrowprops,
+        xycoords="axes fraction",
+    )
+
+    f_ax2.annotate(
+        "",
+        xy=(card_centerx, card_centery - da * 7),
+        xytext=(card_centerx, card_centery),
+        arrowprops=arrowprops,
+        xycoords="axes fraction",
+    )
+
+    f_ax2.text(
+        card_centerx + da,
+        card_centery,
+        "N",
+        transform=f_ax2.transAxes,
+        va="center",
+        ha="left",
+    )
+    f_ax2.text(
+        card_centerx - da,
+        card_centery,
+        "S",
+        transform=f_ax2.transAxes,
+        va="center",
+        ha="right",
+    )
+    f_ax2.text(
+        card_centerx,
+        card_centery + da * 7,
+        "W",
+        transform=f_ax2.transAxes,
+        va="bottom",
+        ha="center",
+    )
+    f_ax2.text(
+        card_centerx,
+        card_centery - da * 7,
+        "E",
+        transform=f_ax2.transAxes,
+        va="top",
+        ha="center",
+    )
+
+    ssta.mean(dim=["time", "lon"]).rolling(
+        lat=10, min_periods=1, center=True
+    ).mean().plot(ax=f_ax3)
+    f_ax3.set_ylabel("SSTA [°C]")
+    f_ax3.set_xlabel("Latitude")
+    f_ax3.set_yticks(np.arange(-3.5, 3.51, 1))
+    f_ax3.set_ylim(-3.5, 3.5)
+    f_ax3.axhline(ls="--", c="k", lw=0.5)
+    f_ax3.grid(ls="--", alpha=0.5)
+
+    props = dict(boxstyle="round", facecolor="wheat", alpha=0.2)
+    f_ax0.text(
+        0.03,
+        0.95,
+        "d",
+        transform=f_ax0.transAxes,
+        bbox=props,
+        verticalalignment="top",
+        horizontalalignment="right",
+    )
+    f_ax1.text(
+        0.03,
+        0.95,
+        "c",
+        transform=f_ax1.transAxes,
+        bbox=props,
+        verticalalignment="top",
+        horizontalalignment="right",
+    )
+    f_ax2.text(
+        0.03,
+        0.9,
+        "b",
+        transform=f_ax2.transAxes,
+        bbox=props,
+        verticalalignment="top",
+        horizontalalignment="right",
+    )
+    f_ax3.text(
+        0.03,
+        0.9,
+        "a",
+        transform=f_ax3.transAxes,
+        bbox=props,
+        verticalalignment="top",
+        horizontalalignment="right",
+    )
+
+    f_ax3.text(
+        0,
+        1.65,
+        "[a] OSTIA Sea Surface Temperature Anomaly\n"
+        "[b] (Line) DUACS L4 Sea Level Anomaly\n"
+        "     (Arrows) ASCAT L3 Wind Stress Anomaly",
+        transform=f_ax3.transAxes,
+        verticalalignment="top",
+        horizontalalignment="left",
+    )
+
+    f_ax3.text(
+        0.6,
+        1.65,
+        "Clim: GODAS      1981-2010\n"
+        "Clim: DUACS L4  1993-2010\n"
+        "Clim: ASCAT - ERA adjusted 2008-2014\n",
+        transform=f_ax3.transAxes,
+        verticalalignment="top",
+        horizontalalignment="left",
+    )
+
+    f_ax0.text(
+        0,
+        -0.3,
+        "[c] ARGO Vertical Temperature\n" "[d] ARGO Vertical Practical Salinity",
+        transform=f_ax0.transAxes,
+        verticalalignment="top",
+        horizontalalignment="left",
+    )
+    # f_ax0.text(
+    #     0.6,
+    #     -0.3,
+    #     "Clim: IMARPE      1981-2020",
+    #     transform=f_ax0.transAxes,
+    #     verticalalignment="top",
+    #     horizontalalignment="left",
+    # )
+
+    f_ax0.text(
+        0,
+        -0.15,
+        "Processing: IGP",
+        transform=f_ax0.transAxes,
+        verticalalignment="top",
+        horizontalalignment="left",
+        fontsize=9,
+    )
+
+    f_ax0.text(
+        1,
+        -0.15,
+        f"Latest Date: {pd.to_datetime(latest_date.data):%d-%b-%Y}",
+        transform=f_ax0.transAxes,
+        verticalalignment="top",
+        horizontalalignment="right",
+        fontsize=9,
+    )
+
+    f_ax0.text(
+        1,
+        -0.4,
+        f"*All plots shown are 30-day average of data points\n within 200nm from the coast",
+        transform=f_ax0.transAxes,
+        verticalalignment="top",
+        horizontalalignment="right",
+        fontsize=9,
+    )
+
+    fig.savefig(os.path.join(out_path, f"CoastMVar200nm_{depth}.png"))
+    fig.savefig(os.path.join(out_path, f"CoastMVar200nm_{depth}.jpeg"), dpi=200)
+
+### PLOT ANOM ###
+def makePlot_anom(
+    psal,
+    psal_raw,
+    temp,
+    temp_raw,
+    sla,
+    taux,
+    tauy,
+    ssta,
+    latest_date,
+    out_path="",
+    depth=850,
+):
+    fig = plt.figure(constrained_layout=True, figsize=(8, 8), dpi=300)
+    spec = gridspec.GridSpec(ncols=1, nrows=4, figure=fig, height_ratios=[1, 1, 2, 2])
+    f_ax0 = fig.add_subplot(spec[3, :])
+    f_ax1 = fig.add_subplot(spec[2, :], sharex=f_ax0)
+    f_ax2 = fig.add_subplot(spec[1, :], sharex=f_ax0)
+    f_ax3 = fig.add_subplot(spec[0, :], sharex=f_ax0)
+
+    ### SAL
+    plot_data_smooth = (
+        psal.interpolate_na(dim="LATITUDE")
+        .rolling(LATITUDE=5, center=True, min_periods=1)
+        .mean()
+    )
+    plot_data_smooth.plot.contourf(
+        x="LATITUDE",
+        vmin=33.5,
+        vmax=35.1,
+        cmap=cmo.cm.haline,
+        levels=33,
+        ax=f_ax0,
+        yincrease=False,
+        cbar_kwargs=dict(label="Salinity", pad=-0.09, ticks=np.arange(33.5, 35.2, 0.2)),
+    )
+    conts = plot_data_smooth.plot.contour(
+        x="LATITUDE",
+        vmin=33.5,
+        vmax=35.1,
+        levels=17,
+        ax=f_ax0,
+        colors="k",
+        linewidths=0.2,
+        yincrease=False,
+    )
+
+    lev = conts.levels.copy()
+    lev = lev[lev != 34.9]
+    f_ax0.clabel(conts, levels=lev, fontsize=7, inline_spacing=-7)
+
+    conts = plot_data_smooth.plot.contour(
+        x="LATITUDE",
+        levels=[33.8, 34.8, 35.1],
+        ax=f_ax0,
+        colors="k",
+        linewidths=0.8,
+        yincrease=False,
+    )
+
+    f_ax0.clabel(conts, fontsize=6.73, inline=True, inline_spacing=-7)
+
+    f_ax0.scatter(
+        psal_raw.LATITUDE,
+        np.full_like(psal_raw.LATITUDE, 0),
+        c="k",
+        s=5,
+        marker="s",
+        clip_on=False,
+    )
+
+    f_ax0.scatter(
+        psal_raw.LATITUDE,
+        np.full_like(psal_raw.LATITUDE, depth),
+        c="k",
+        s=5,
+        marker="s",
+        clip_on=False,
+    )
+
+    f_ax0.set_xlim(-20, -2)
+    f_ax0.set_ylim(depth, 0)
     f_ax0.set_ylabel("Depth [m]")
     f_ax0.set_xlabel("Latitude")
     f_ax0.grid(ls="--", alpha=0.5)
@@ -130,7 +527,7 @@ def makePlot(
         yincrease=False,
         cbar_kwargs=dict(label="Temperature Anomaly [°C]", pad=-0.09),
     )
-    plot_data_smooth.plot.contour(
+    conts = plot_data_smooth.plot.contour(
         x="LATITUDE",
         vmin=-3,
         vmax=3,
@@ -165,14 +562,14 @@ def makePlot(
 
     f_ax1.scatter(
         temp_raw.LATITUDE,
-        np.full_like(temp_raw.LATITUDE, 850),
+        np.full_like(temp_raw.LATITUDE, depth),
         c="k",
         s=5,
         marker="s",
         clip_on=False,
     )
 
-    f_ax1.set_ylim(850, 0)
+    f_ax1.set_ylim(depth, 0)
     f_ax1.set_ylabel("Depth [m]")
     f_ax1.set_xlabel("Latitude")
     f_ax1.grid(ls="--", alpha=0.5)
@@ -190,10 +587,10 @@ def makePlot(
         np.full_like(taux.lat, 0)[::2],
         tauy.mean(dim=["time", "lon"])[::2] * 100,
         taux.mean(dim=["time", "lon"])[::2] * -100,
-        angles="xy",
+        units="xy",
         scale_units="xy",
         scale=1,
-        width=0.004,
+        width=0.05,
     )
     f_ax2.quiverkey(
         Q,
@@ -398,8 +795,8 @@ def makePlot(
         fontsize=9,
     )
 
-    fig.savefig(os.path.join(out_path, "CoastMVar200nm.png"))
-    fig.savefig(os.path.join(out_path, "CoastMVar200nm.jpeg"), dpi=200)
+    fig.savefig(os.path.join(out_path, f"CoastMVar200nm_anom_{depth}.png"))
+    fig.savefig(os.path.join(out_path, f"CoastMVar200nm_anom_{depth}.jpeg"), dpi=200)
 
 
 if __name__ == "__main__":
@@ -503,6 +900,7 @@ if __name__ == "__main__":
     CLIM = imarpe_clim
 
     _cont = []
+    _cont_abs = []
     for temp_profile in argo_interp.TEMP:
         sel_clim = CLIM.sel(
             lat=temp_profile.LATITUDE,
@@ -521,13 +919,25 @@ if __name__ == "__main__":
             level=level, kwargs=dict(fill_value="extrapolate")
         )
         anom = temp_profile - sel_clim
+        _cont_abs.append(temp_profile)
         _cont.append(anom)
 
     temp_data_raw = (
         xr.concat(_cont, dim="LATITUDE").sortby("TIME").groupby("LATITUDE").mean()
     )
+    temp_data_abs_raw = (
+        xr.concat(_cont_abs, dim="LATITUDE").sortby("TIME").groupby("LATITUDE").mean()
+    )
+
     temp_data = (
         temp_data_raw.groupby_bins(
+            "LATITUDE", bins=np.arange(-20, 0.6, 0.1), labels=np.arange(-20, 0.5, 0.1)
+        )
+        .mean()
+        .rename(LATITUDE_bins="LATITUDE")
+    )
+    temp_data_abs = (
+        temp_data_abs_raw.groupby_bins(
             "LATITUDE", bins=np.arange(-20, 0.6, 0.1), labels=np.arange(-20, 0.5, 0.1)
         )
         .mean()
@@ -566,6 +976,47 @@ if __name__ == "__main__":
     ssta_plot = (ssta_plot - godas_dayclim_sel.interp_like(ssta_plot)).load()
 
     makePlot(
+        psal_data,
+        psal_data_raw,
+        temp_data_abs,
+        temp_data_abs_raw,
+        sla_plot,
+        taux_plot,
+        tauy_plot,
+        ssta_plot,
+        argo_interp.TEMP.TIME.max(),
+        out_path=OUTPUT,
+        depth=200,
+    )
+
+    makePlot_anom(
+        psal_data,
+        psal_data_raw,
+        temp_data,
+        temp_data_raw,
+        sla_plot,
+        taux_plot,
+        tauy_plot,
+        ssta_plot,
+        argo_interp.TEMP.TIME.max(),
+        out_path=OUTPUT,
+        depth=200,
+    )
+
+    makePlot(
+        psal_data,
+        psal_data_raw,
+        temp_data_abs,
+        temp_data_abs_raw,
+        sla_plot,
+        taux_plot,
+        tauy_plot,
+        ssta_plot,
+        argo_interp.TEMP.TIME.max(),
+        out_path=OUTPUT,
+    )
+
+    makePlot_anom(
         psal_data,
         psal_data_raw,
         temp_data,
