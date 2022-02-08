@@ -4,7 +4,7 @@ import os
 import argopy
 import geopandas as gpd
 from argopy import IndexFetcher as ArgoIndexFetcher
-from geopandas.tools import sjoin
+from dmelon.utils import findPointsInPolys
 
 argopy.set_options(src="localftp", local_ftp="/data/datos/ARGO/gdac")
 
@@ -27,19 +27,15 @@ argo_df = index_loader.region(region + date_range).to_dataframe().sort_values("d
 
 mask200 = gpd.read_file("/data/users/grivera/Shapes/NEW_MASK/200mn_full.shp")
 
-argo_geodf = gpd.GeoDataFrame(
-    argo_df,
-    geometry=gpd.points_from_xy(argo_df.longitude, argo_df.latitude, crs="EPSG:4326"),
-)
-
-pointInPolys = sjoin(argo_geodf, mask200, op="within", how="inner")
-
+pointInPolys = findPointsInPolys(argo_df, mask200)
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 from cartopy.io.shapereader import Reader
 from dmelon.plotting import format_latlon
+from matplotlib.patches import Patch
 
 HQ_BORDER = cfeature.NaturalEarthFeature(
     category="cultural",
@@ -50,13 +46,30 @@ HQ_BORDER = cfeature.NaturalEarthFeature(
     linewidth=1,
 )
 
+c50 = "#C8C8C8"
+c100 = "#DCDCDC"
 c200 = "#F0F0F0"
+
+shape50 = cfeature.ShapelyFeature(
+    Reader("/data/users/grivera/Shapes/NEW_MASK/50mn_full.shp").geometries(),
+    ccrs.PlateCarree(),
+    facecolor=c50,
+)
+
+shape100 = cfeature.ShapelyFeature(
+    Reader("/data/users/grivera/Shapes/NEW_MASK/100mn_full.shp").geometries(),
+    ccrs.PlateCarree(),
+    facecolor=c100,
+)
 shape200 = cfeature.ShapelyFeature(
     Reader("/data/users/grivera/Shapes/NEW_MASK/200mn_full.shp").geometries(),
     ccrs.PlateCarree(),
     facecolor=c200,
 )
 
+patch50 = Patch(facecolor=c50, label="0-50nm", edgecolor="gray")
+patch100 = Patch(facecolor=c100, label="50-100nm", edgecolor="gray")
+patch200 = Patch(facecolor=c200, label="100-200nm", edgecolor="gray")
 # patch200 = Patch(facecolor=c200, label="100-200nm", edgecolor="gray")
 
 fig, ax = plt.subplots(
@@ -65,6 +78,8 @@ fig, ax = plt.subplots(
 
 ax.add_feature(HQ_BORDER, zorder=10)
 ax.add_feature(shape200)
+ax.add_feature(shape100)
+ax.add_feature(shape50)
 format_latlon(ax, ccrs.PlateCarree(), (-110, -60, -30, 10), 2.5, 2.5)
 
 unique_vals = pointInPolys.sort_values("date").wmo.unique()
@@ -73,15 +88,28 @@ for _wmo in (
 ):
     _sel = pointInPolys.query("wmo==@_wmo")
     ax.plot(_sel.longitude, _sel.latitude, label=_wmo)
-    sca = ax.scatter(
-        _sel.longitude.iloc[-1], _sel.latitude.iloc[-1], color="k", s=3, zorder=9
+    ax.scatter(
+        _sel.longitude.iloc[-1],
+        _sel.latitude.iloc[-1],
+        color="k",
+        s=3,
+        zorder=9,
     )
 
 
 ax.set_extent([-85, -70, -20, 0], crs=ccrs.PlateCarree())
 ax.grid(ls="--", alpha=0.5)
 
-leg2 = plt.legend([sca], ["Latest Position"], loc=4)
+sca = mlines.Line2D(
+    [],
+    [],
+    color="k",
+    marker="o",
+    linestyle="none",
+    markersize=3,
+    label="Latest Position",
+)
+leg2 = plt.legend(handles=[sca, patch200, patch100, patch50], loc=4)
 leg2.set_zorder(100)
 ax.add_artist(leg2)
 
