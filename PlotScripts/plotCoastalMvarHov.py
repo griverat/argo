@@ -9,6 +9,7 @@ import pandas as pd
 import xarray as xr
 from argopy import DataFetcher as ArgoDataFetcher
 from argopy import IndexFetcher as ArgoIndexFetcher
+from dmelon.ocean.argo import build_dl, launch_shell
 from geopandas.tools import sjoin
 
 
@@ -40,7 +41,6 @@ def maskVariableShape(variable, shape):
 
 
 import cmocean as cmo
-
 # import cartopy.crs as ccrs
 # import cartopy.feature as cfeature
 import matplotlib.gridspec as gridspec
@@ -422,6 +422,7 @@ def makePlot(
 
     fig.savefig(os.path.join(out_path, f"CoastMVar200nm_{depth}.png"))
     fig.savefig(os.path.join(out_path, f"CoastMVar200nm_{depth}.jpeg"), dpi=200)
+
 
 ### PLOT ANOM ###
 def makePlot_anom(
@@ -869,6 +870,8 @@ if __name__ == "__main__":
     argo_df = (
         index_loader.region(region + date_range).to_dataframe().sort_values("date")
     )
+
+    launch_shell(build_dl(argo_df))
 
     # Load profiles with xarray
     ds = argo_loader.region(region + [0, 1000] + date_range).to_xarray()
