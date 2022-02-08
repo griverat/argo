@@ -196,8 +196,10 @@ for order, argo_code in enumerate(argo_codes):
     )
     check_folder(OUT_DIR)
 
-    _argo_profile = ds_profile_qc.copy().where(ds_profile.PLATFORM_NUMBER == argo_code).dropna(
-        dim="N_PROF", how="all"
+    _argo_profile = (
+        ds_profile_qc.copy()
+        .where(ds_profile.PLATFORM_NUMBER == argo_code)
+        .dropna(dim="N_PROF", how="all")
     )
     sdate = pd.to_datetime(_argo_profile.TIME.max().data) - pd.Timedelta("365D")
 
