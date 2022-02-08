@@ -13,3 +13,4 @@ paths.json
 argo_run_traj.sh
 argo_region_nc.sh
 auto_tracker.sh
+launch_shell.sh
