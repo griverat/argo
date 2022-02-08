@@ -245,16 +245,22 @@ for order, argo_code in enumerate(argo_codes):
             _CLIM = CLIM["normal"]
 
         for source, _clim in _CLIM.items():
-            _clim_sel = _clim.sel(
-                lat=_sel_prof.LATITUDE,
-                lon=np.where(
-                    _sel_prof.LONGITUDE < 0,
-                    _sel_prof.LONGITUDE + 360,
-                    _sel_prof.LONGITUDE,
-                ),
-                time=f"{_clim.time.dt.year[0].data}-{pd.to_datetime(_sel_prof.TIME.data):%m-%d}",
-                method="nearest",
-            ).load()
+            _clim_sel = (
+                _clim.sel(
+                    time=f"{_clim.time.dt.year[0].data}-{pd.to_datetime(_sel_prof.TIME.data):%m-%d}",
+                )
+                .ffill(dim="lat")
+                .sel(
+                    lat=_sel_prof.LATITUDE,
+                    lon=np.where(
+                        _sel_prof.LONGITUDE < 0,
+                        _sel_prof.LONGITUDE + 360,
+                        _sel_prof.LONGITUDE,
+                    ),
+                    method="nearest",
+                )
+                .load()
+            )
             if _clim_sel.level[0].data != 0:
                 _clim_sel = xr.DataArray(
                     np.concatenate((_clim_sel[[0]], _clim_sel)),
