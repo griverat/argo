@@ -114,6 +114,49 @@ from matplotlib.collections import LineCollection
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from shapely.geometry import LineString, Point
+
+peru_line = gpd.read_file(
+    "/data/users/grivera/Shapes/ESRI/baseline_diss_lines.shp", crs="EPSG:4326"
+)
+
+
+def redistribute_vertices(geom, distance, xarr):
+    if geom.geom_type == "LineString":
+        num_vert = int(round(geom.length / distance))
+        if num_vert == 0:
+            num_vert = 1
+        points = [
+            geom.interpolate(float(n) / num_vert, normalized=True)
+            for n in range(num_vert + 1)
+        ]
+        points = [
+            Point(point.x - xarr.sel(lat=point.y, method="nearest").data, point.y)
+            for point in points
+        ]
+        return LineString(points)
+    elif geom.geom_type == "MultiLineString":
+        parts = [redistribute_vertices(part, distance, xarr) for part in geom]
+        return type(geom)([p for p in parts if not p.is_empty])
+    else:
+        raise ValueError("unhandled geometry %s", (geom.geom_type,))
+
+
+lamb = (
+    3
+    * np.abs(
+        gsw.geostrophy.f(
+            xr.DataArray(np.nan, coords=[("lat", np.arange(0, -20, -0.1))]).lat
+        )
+    )
+    ** -1
+)
+lamb = lamb / 111e3
+
+ross = peru_line.geometry.apply(
+    redistribute_vertices, distance=0.1, xarr=lamb.where(np.abs(lamb.lat) > 5)
+)
+
 
 HQ_SA = cfeature.NaturalEarthFeature(
     category="cultural",
@@ -148,6 +191,19 @@ shape200 = cfeature.ShapelyFeature(
 patch50 = Patch(facecolor=c50, label="0-50nm", edgecolor="gray")
 patch100 = Patch(facecolor=c100, label="50-100nm", edgecolor="gray")
 patch200 = Patch(facecolor=c200, label="100-200nm", edgecolor="gray")
+ross_line = Line2D(
+    [], [], color="k", ls="--", label="Rossby radius\nof deformation", lw=0.8
+)
+lpos = Line2D(
+    [0],
+    [0],
+    marker=r"$\bigodot$",
+    color="none",
+    label="Latest position",
+    markerfacecolor="none",
+    markeredgecolor="k",
+    markersize=10,
+)
 
 rgbset2 = {
     0: "#FFFFFF",
