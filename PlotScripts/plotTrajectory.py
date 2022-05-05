@@ -257,11 +257,6 @@ for order, argo_code in enumerate(argo_codes):
         .where(ds_profile.PLATFORM_NUMBER == argo_code)
         .dropna(dim="N_PROF", how="all")
     )
-    sdate = pd.to_datetime(_argo_profile.TIME.max().data) - pd.Timedelta("365D")
-
-    _argo_profile = _argo_profile.where(ds_profile.TIME > sdate).dropna(
-        dim="N_PROF", how="all"
-    )
 
     level = np.arange(0, 2100, 1)
 
@@ -331,7 +326,13 @@ for order, argo_code in enumerate(argo_codes):
 
     argo_float_interp = xr.concat(_cont, dim="TIME").interpolate_na(dim="level").load()
 
-    _data = argo_float_interp.rolling(TIME=3, center=True, min_periods=1).mean()
+    sdate = pd.to_datetime(argo_float_interp.TIME.max().data) - pd.Timedelta("365D")
+    _data = (
+        argo_float_interp.where(argo_float_interp.TIME > sdate)
+        .dropna(dim="TIME", how="all")
+        .rolling(TIME=3, center=True, min_periods=1)
+        .mean()
+    )
 
     lat_center = (_data.LATITUDE.min().data + _data.LATITUDE.max().data) / 2
     lon_center = (_data.LONGITUDE.min().data + _data.LONGITUDE.max().data) / 2
