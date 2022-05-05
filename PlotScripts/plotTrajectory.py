@@ -325,6 +325,9 @@ for order, argo_code in enumerate(argo_codes):
         _cont.append(_interp)
 
     argo_float_interp = xr.concat(_cont, dim="TIME").interpolate_na(dim="level").load()
+    argo_float_interp.to_netcdf(
+        f"/data/users/service/ARGO/FLOATS/ncstore/{argo_code}.nc"
+    )
 
     sdate = pd.to_datetime(argo_float_interp.TIME.max().data) - pd.Timedelta("365D")
     _data = (
