@@ -482,20 +482,12 @@ for order, argo_code in enumerate(argo_codes):
     ax3.add_feature(shape100)
     ax3.add_feature(shape50)
     ax3.add_feature(HQ_SA)
-
-    lpos = Line2D(
-        [0],
-        [0],
-        marker=r"$\bigodot$",
-        color="none",
-        label="Latest position",
-        markerfacecolor="none",
-        markeredgecolor="k",
-        markersize=10,
-    )
+    ross.plot(ax=ax3, color="k", ls="--")
 
     ax3.legend(
-        handles=[lpos, patch200, patch100, patch50], loc="lower left", fontsize=10
+        handles=[ross_line, lpos, patch200, patch100, patch50],
+        loc="lower left",
+        fontsize=10,
     ).set_zorder(20)
 
     ax3.set_extent(bnds, crs=ccrs.PlateCarree())
