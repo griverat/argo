@@ -25,7 +25,7 @@ index_loader = ArgoIndexFetcher()
 # Data loading parameters
 argo_region = [-90, -70, -20, -2.5]
 today = datetime.datetime.today()
-idate = today - datetime.timedelta(days=15)
+idate = today - datetime.timedelta(days=20)
 endate = today + datetime.timedelta(days=15)
 date_range = [
     f"{idate:%Y-%m-%d}",
