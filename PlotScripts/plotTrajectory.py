@@ -269,6 +269,9 @@ for order, argo_code in enumerate(argo_codes):
         _TEMP = _sel_prof.TEMP.sel(N_LEVELS=_non_nan_index).data
         _PSAL = _sel_prof.PSAL.sel(N_LEVELS=_non_nan_index).data
 
+        if _PRES.size == 0:
+            continue
+
         if _PRES[0] < 10:
             _PRES = np.concatenate(([0], _PRES))
             _TEMP = np.concatenate((_TEMP[[0]], _TEMP))
