@@ -9,9 +9,10 @@ Copyright (c) 2019 Instituto Geofisico del Peru
 -----
 """
 
-import pandas as pd
-import os
 import json
+import os
+
+import pandas as pd
 
 
 def parse_db(argo_file):

@@ -7,20 +7,20 @@ Email: gerardo_art@me.com
 -----
 """
 
-import pandas as pd
-import numpy as np
-import json
 import argparse
 import datetime
+import json
 import os
 
 import cartopy.crs as ccrs
-from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
-import matplotlib.pyplot as plt
+import cartopy.feature as cfeature
+import matplotlib.cm as cmx
 import matplotlib.colors as colors
 import matplotlib.patches as mpatches
-import matplotlib.cm as cmx
-import cartopy.feature as cfeature
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from cartopy.mpl.ticker import LatitudeFormatter, LongitudeFormatter
 
 with open("./../paths.json") as f:
     paths = json.load(f)

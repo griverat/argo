@@ -8,7 +8,6 @@ from argopy import DataFetcher as ArgoDataFetcher
 from argopy import IndexFetcher as ArgoIndexFetcher
 from scipy import interpolate
 
-
 # ARGOpy options
 argopy.set_options(src="localftp", local_ftp="/data/datos/ARGO/gdac")
 argopy.set_options(mode="expert")
