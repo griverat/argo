@@ -7,6 +7,7 @@
 *logs
 *__pycache__
 *.nc
+*.txt
 argo_merge-profile_index.txt
 auto_argo.sh
 paths.json
