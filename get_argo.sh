@@ -23,7 +23,7 @@ do
     cd ${output}
     rm ${fecha2}
 
-    wget -c  ftp://ftp.ifremer.fr/ifremer/argo/geo/pacific_ocean/$year/$month/$fecha$archivo
+    wget -c  https://data-argo.ifremer.fr/geo/pacific_ocean/$year/$month/$fecha$archivo
     
     if [ -f "${fecha2}"  ]
     then
