@@ -12,7 +12,7 @@ from argopy import IndexFetcher as ArgoIndexFetcher
 from dmelon.utils import findPointsInPolys
 from scipy import interpolate
 
-argopy.set_options(src="localftp", local_ftp="/data/datos/ARGO/gdac")
+argopy.set_options(src="gdac", ftp="/data/datos/ARGO/gdac")
 
 argopy.set_options(mode="expert")
 
@@ -43,7 +43,7 @@ argo_codes = (
 )
 print(argo_codes)
 
-argo_loader = ArgoDataFetcher(parallel="process", progress=True)
+argo_loader = ArgoDataFetcher(parallel=True, progress=True)
 
 ds = argo_loader.float(argo_codes).to_xarray()
 ds_profile = ds.argo.point2profile().sortby("TIME")

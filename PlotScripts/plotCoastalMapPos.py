@@ -6,7 +6,7 @@ import geopandas as gpd
 from argopy import IndexFetcher as ArgoIndexFetcher
 from dmelon.utils import findPointsInPolys
 
-argopy.set_options(src="localftp", local_ftp="/data/datos/ARGO/gdac")
+argopy.set_options(src="gdac", ftp="/data/datos/ARGO/gdac")
 
 argopy.set_options(mode="expert")
 

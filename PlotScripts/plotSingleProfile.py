@@ -7,13 +7,15 @@ import xarray as xr
 from argopy import DataFetcher as ArgoDataFetcher
 from argopy import IndexFetcher as ArgoIndexFetcher
 from scipy import interpolate
+from dmelon.ocean.argo import build_dl, launch_shell
+
 
 # ARGOpy options
-argopy.set_options(src="localftp", local_ftp="/data/datos/ARGO/gdac")
+argopy.set_options(src="gdac", ftp="/data/datos/ARGO/gdac")
 argopy.set_options(mode="expert")
 
 # ARGOpy loaders
-argo_loader = ArgoDataFetcher(parallel="process", progress=True)
+argo_loader = ArgoDataFetcher(parallel=True, progress=True)
 index_loader = ArgoIndexFetcher()
 
 OUTPATH = "/data/users/service/ARGO/FLOATS/output/ARGO-singleprof"
@@ -35,6 +37,8 @@ argo_codes = [
 ]
 
 argo_df = index_loader.float(argo_codes).to_dataframe()
+
+launch_shell(build_dl(argo_df))
 
 ds = argo_loader.float(argo_codes).to_xarray()
 

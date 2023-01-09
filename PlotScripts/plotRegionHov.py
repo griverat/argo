@@ -41,11 +41,11 @@ godas_clim_normal = xr.open_dataset(
 ).pottmp
 
 # ARGOpy Global options
-argopy.set_options(src="localftp", local_ftp="/data/datos/ARGO/gdac")
+argopy.set_options(src="gdac", ftp="/data/datos/ARGO/gdac")
 argopy.set_options(mode="expert")
 
 # Data Fetcher
-argo_loader = ArgoDataFetcher(parallel="process", progress=True)
+argo_loader = ArgoDataFetcher(parallel=True, progress=True)
 
 # Index Fetcher
 index_loader = ArgoIndexFetcher()

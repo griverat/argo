@@ -8,7 +8,7 @@ ARGO_localFTP = "/data/datos/ARGO/gdac"
 
 
 def main(kind, args):
-    argopy.set_options(src="localftp", local_ftp=ARGO_localFTP)
+    argopy.set_options(src="gdac", ftp=ARGO_localFTP)
     argopy.set_options(mode="expert")
     index_loader = ArgoIndexFetcher()
     if kind == "region":
@@ -24,8 +24,13 @@ def main(kind, args):
     elif kind == "floats":
         argo_df = index_loader.float(args).to_dataframe()
     dl_list = build_dl(argo_df, ARGO_localFTP)
+    new_dl_list = []
+    for num, cmd in enumerate(dl_list):
+        if (num + 1) % 20 == 0:
+            new_dl_list.append("echo 'Sleeping 60s' ; sleep 60")
+        new_dl_list.append(cmd)
     print("Download commands built, launching subshell")
-    launch_shell(dl_list)
+    launch_shell(new_dl_list)
     print("Done")
 
 

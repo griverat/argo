@@ -13,12 +13,12 @@ from dmelon.utils import check_folder, findPointsInPolys
 from scipy import interpolate
 
 # ARGOpy global options
-argopy.set_options(src="localftp", local_ftp="/data/datos/ARGO/gdac")
+argopy.set_options(src="gdac", ftp="/data/datos/ARGO/gdac")
 argopy.set_options(mode="expert")
 
 
 # ARGO data fetcher
-argo_loader = ArgoDataFetcher(parallel="process", progress=True)
+argo_loader = ArgoDataFetcher(parallel=True, progress=True)
 index_loader = ArgoIndexFetcher()
 
 
